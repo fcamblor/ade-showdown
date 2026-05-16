@@ -3,5 +3,5 @@ import svelte from '@astrojs/svelte';
 
 export default defineConfig({
   integrations: [svelte()],
-  site: 'https://orch-showdown.pages.dev',
+  site: 'https://ade-showdown.pages.dev',
 });

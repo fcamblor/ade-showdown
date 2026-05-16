@@ -1,4 +1,4 @@
-# 🥊 Orch Showdown
+# 🥊 ADE Showdown
 
 Feature comparison of coding agent orchestrators (Conductor, Vibe Kanban, GitHub Copilot Coding Agent, t3.codes, …).
 
