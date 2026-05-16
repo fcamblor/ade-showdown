@@ -83,22 +83,39 @@ function findSupport(toolIndex: number, featureId: string) {
   return orch.features.find((f) => f.featureId === featureId);
 }
 
+type SupportScore = {
+  yes: number;
+  partial: number;
+  total: number;
+};
 
-// Pre-compute per-category breakdown (yes counts) per orchestrator
+function scoreFeatures(
+  features: Feature[],
+  supports: (typeof ORCHESTRATORS)[number]['features'],
+): SupportScore {
+  return features.reduce(
+    (score, feature) => {
+      const support = supports.find((sup) => sup.featureId === feature.id)?.support;
+      if (support === 'yes') score.yes += 1;
+      if (support === 'partial') score.partial += 1;
+      return score;
+    },
+    { yes: 0, partial: 0, total: features.length },
+  );
+}
+
+const visibleFeatures = grouped.flatMap(({ features }) => features);
+
+// Pre-compute per-category breakdown per orchestrator.
 const categoryScores = ORCHESTRATORS.map((o) =>
   Object.fromEntries(
-    grouped.map(({ category, features }) => {
-      const yes = features.filter((f) => {
-        const s = o.features.find((sup) => sup.featureId === f.id);
-        return s?.support === 'yes';
-      }).length;
-      return [category, { yes, total: features.length }];
-    }),
-  ) as Record<FeatureCategory, { yes: number; total: number }>,
+    grouped.map(({ category, features }) => [category, scoreFeatures(features, o.features)]),
+  ) as Record<FeatureCategory, SupportScore>,
 );
+const globalScores = ORCHESTRATORS.map((o) => scoreFeatures(visibleFeatures, o.features));
 
 const toolCount = ORCHESTRATORS.length;
-const featureCount = FEATURES.length;
+const featureCount = visibleFeatures.length;
 ---
 
 <section class="comparator" aria-labelledby="comparator-title">
@@ -137,6 +154,26 @@ const featureCount = FEATURES.length;
               <th scope="col" class="cell--tool">
                 <div class="tool">
                   <a class="tool__name" href={o.homepage} target="_blank" rel="noreferrer">{o.toolName}</a>
+                  {(() => {
+                    const score = globalScores[idx];
+                    return (
+                      <div
+                        class="score score--global"
+                        aria-label={`${score.yes} supported plus ${score.partial} partial out of ${score.total} visible features for ${o.toolName}`}
+                      >
+                        <span class="score__item score__item--yes">
+                          <span class="score__glyph" aria-hidden="true">●</span>
+                          <span class="score__value">{score.yes}</span>
+                        </span>
+                        <span class="score__operator" aria-hidden="true">+</span>
+                        <span class="score__item score__item--partial">
+                          <span class="score__glyph" aria-hidden="true">◐</span>
+                          <span class="score__value">{score.partial}</span>
+                        </span>
+                        <span class="score__den">/ {score.total}</span>
+                      </div>
+                    );
+                  })()}
                   <p class="tool__meta">
                     {(() => {
                       const vd = o.versionDetails;
@@ -263,9 +300,22 @@ const featureCount = FEATURES.length;
                 {ORCHESTRATORS.map((_, i) => {
                   const s = categoryScores[i][group.category];
                   return (
-                    <td class="cell--category-score" aria-label={`${s.yes} of ${s.total} ${categoryLabel[group.category]} features supported`}>
-                      <span class="cell--category-score__num">{s.yes}</span>
-                      <span class="cell--category-score__den">/ {s.total}</span>
+                    <td
+                      class="cell--category-score"
+                      aria-label={`${s.yes} supported plus ${s.partial} partial out of ${s.total} ${categoryLabel[group.category]} features`}
+                    >
+                      <div class="score score--category">
+                        <span class="score__item score__item--yes">
+                          <span class="score__glyph" aria-hidden="true">●</span>
+                          <span class="score__value">{s.yes}</span>
+                        </span>
+                        <span class="score__operator" aria-hidden="true">+</span>
+                        <span class="score__item score__item--partial">
+                          <span class="score__glyph" aria-hidden="true">◐</span>
+                          <span class="score__value">{s.partial}</span>
+                        </span>
+                        <span class="score__den">/ {s.total}</span>
+                      </div>
                     </td>
                   );
                 })}
@@ -450,6 +500,8 @@ const featureCount = FEATURES.length;
   }
   .tool { display: flex; flex-direction: column; gap: var(--s-1); position: relative; }
   .tool__name {
+    display: block;
+    min-height: 2.9rem;
     font-family: var(--font-display);
     font-weight: 900;
     font-size: 1.45rem;
@@ -546,6 +598,51 @@ const featureCount = FEATURES.length;
   }
   .tool__release time { font-variant-numeric: tabular-nums; }
 
+  .score {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 5px;
+    font-family: var(--font-display);
+    white-space: nowrap;
+  }
+  .score--global {
+    padding: 5px var(--s-2);
+    border: 1px solid var(--border-soft);
+    border-radius: var(--radius-sm);
+    background: oklch(0.19 0.014 25);
+  }
+  .score__item {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 3px;
+    font-variant-numeric: tabular-nums;
+    line-height: 1;
+  }
+  .score__glyph {
+    font-family: var(--font-body);
+    font-size: 0.72rem;
+    transform: translateY(-1px);
+  }
+  .score__value {
+    font-size: 1.05rem;
+    font-weight: 900;
+  }
+  .score__operator {
+    color: var(--fg-faint);
+    font-size: 0.82rem;
+    font-weight: 900;
+  }
+  .score__den {
+    font-size: 0.72rem;
+    color: var(--fg-muted);
+    font-weight: 700;
+    letter-spacing: 0.06em;
+  }
+  .score__item--yes { color: var(--cell-yes-ink); }
+  .score__item--partial { color: var(--cell-partial-ink); }
+  .score--global .score__value { font-size: 1rem; }
+  .score--global .score__glyph { font-size: 0.68rem; }
+
   .tool__platforms {
     list-style: none;
     margin: var(--s-2) 0 0;
@@ -633,19 +730,7 @@ const featureCount = FEATURES.length;
     vertical-align: baseline;
     white-space: nowrap;
   }
-  .cell--category-score__num {
-    font-size: 1.15rem;
-    font-weight: 900;
-    color: var(--accent);
-    line-height: 1;
-  }
-  .cell--category-score__den {
-    font-size: 0.72rem;
-    color: var(--fg-muted);
-    font-weight: 700;
-    letter-spacing: 0.06em;
-    margin-left: 4px;
-  }
+  .cell--category-score .score__value { font-size: 1.15rem; }
   .cell--category__label {
     color: var(--canvas);
     font-weight: 900;
@@ -764,8 +849,12 @@ const featureCount = FEATURES.length;
   @media (max-width: 720px) {
     .col--feature { width: 220px; }
     .col--tool { width: 170px; }
-    .tool__name { font-size: 1.2rem; }
-    .cell--category-score__num { font-size: 1rem; }
+    .tool__name {
+      min-height: 2.4rem;
+      font-size: 1.2rem;
+    }
+    .cell--category-score .score__value,
+    .score--global .score__value { font-size: 1rem; }
     th, td { padding: var(--s-3); }
     .feature__summary { padding: var(--s-3); }
   }
