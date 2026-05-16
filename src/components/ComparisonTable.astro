@@ -26,7 +26,7 @@ const supportGlyph: Record<SupportLevel, string> = {
   yes: '●',
   partial: '◐',
   no: '○',
-  unknown: '–',
+  unknown: '?',
 };
 const categoryLabel: Record<FeatureCategory, string> = {
   workflow: 'Workflow',
@@ -133,7 +133,7 @@ const featureCount = visibleFeatures.length;
       <li><span class="legend__dot legend__dot--yes" aria-hidden="true">●</span>Supported</li>
       <li><span class="legend__dot legend__dot--partial" aria-hidden="true">◐</span>Partial</li>
       <li><span class="legend__dot legend__dot--no" aria-hidden="true">○</span>No</li>
-      <li><span class="legend__dot legend__dot--unknown" aria-hidden="true">–</span>Unknown</li>
+      <li><span class="legend__dot legend__dot--unknown" aria-hidden="true">?</span>Unknown</li>
     </ul>
   </header>
 
@@ -834,7 +834,11 @@ const featureCount = visibleFeatures.length;
   .cell--yes     .cell__glyph { color: var(--cell-yes-ink); }
   .cell--no      .cell__glyph { color: var(--cell-no-ink); }
   .cell--partial .cell__glyph { color: var(--cell-partial-ink); }
-  .cell--unknown .cell__glyph { color: var(--cell-unknown-ink); font-size: 1.2rem; }
+  .cell--unknown .cell__glyph {
+    color: var(--cell-unknown-ink);
+    font-size: 1.05rem;
+    font-weight: 700;
+  }
 
   .cell__note {
     margin: var(--s-2) 0 0;
