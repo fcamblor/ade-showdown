@@ -79,10 +79,20 @@ export const TrackingSourceSchema = z.object({
 });
 export type TrackingSource = z.infer<typeof TrackingSourceSchema>;
 
+// Lifecycle status of a version entry. Approved versions are part of the
+// public table by default. Waiting-for-review versions are hidden until a
+// reviewer opts in via the `?preview=<toolId>@<version>` query param
+// (comma-separated for multiple). This lets PRs share a preview link without
+// shipping unvetted data to every visitor.
+export const VersionStatusSchema = z.enum(['approved', 'waiting-for-review']);
+export type VersionStatus = z.infer<typeof VersionStatusSchema>;
+
 export const OrchestratorVersionSchema = z.object({
   toolId: z.string().regex(/^[a-z0-9-]+$/),
   toolName: z.string(),
   version: z.string(),
+  /** Defaults to 'approved' when omitted — see VersionStatusSchema. */
+  status: VersionStatusSchema.optional(),
   versionDetails: z
     .object({
       buildHash: z.string().optional(),

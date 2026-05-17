@@ -26,9 +26,31 @@ for (const toolId of Object.keys(ORCHESTRATORS_BY_TOOL)) {
   ORCHESTRATORS_BY_TOOL[toolId].sort(compareNewestFirst);
 }
 
-// Public table: latest version of each tool, sorted by tool name.
-export const ORCHESTRATORS: OrchestratorVersion[] = Object.values(ORCHESTRATORS_BY_TOOL)
-  .map((versions) => versions[0])
-  .sort((a, b) => a.toolName.localeCompare(b.toolName));
+export function isApproved(v: OrchestratorVersion): boolean {
+  return (v.status ?? 'approved') === 'approved';
+}
+
+// Public table: latest approved version per tool, plus every waiting-for-review
+// version (rendered but hidden by default — revealed by the preview query
+// param). For each tool, the approved column comes first, followed by any
+// pending columns in newest-first order. Tools that only have pending versions
+// still produce columns so the preview link can surface them.
+export const ORCHESTRATORS: OrchestratorVersion[] = (() => {
+  const toolIds = Object.keys(ORCHESTRATORS_BY_TOOL).sort((a, b) => {
+    const an = ORCHESTRATORS_BY_TOOL[a][0].toolName;
+    const bn = ORCHESTRATORS_BY_TOOL[b][0].toolName;
+    return an.localeCompare(bn);
+  });
+  const out: OrchestratorVersion[] = [];
+  for (const id of toolIds) {
+    const versions = ORCHESTRATORS_BY_TOOL[id];
+    const approved = versions.find(isApproved);
+    if (approved) out.push(approved);
+    for (const v of versions) {
+      if (!isApproved(v)) out.push(v);
+    }
+  }
+  return out;
+})();
 
 export { FEATURES } from './features';

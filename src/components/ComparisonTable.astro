@@ -1,7 +1,14 @@
 ---
-import { FEATURES, ORCHESTRATORS } from '../data';
+import { FEATURES, ORCHESTRATORS, isApproved } from '../data';
 import type { SupportLevel, FeatureCategory, Feature, Platform, TrackingSourceKind } from '../data/schema';
 import Evidence from './Evidence.astro';
+
+// Each orchestrator column carries a stable `<toolId>@<version>` key. The
+// preview query param (?preview=tool@version[,tool@version…]) opts a viewer
+// into one or more waiting-for-review versions; matching pending columns are
+// shown and any approved column for the same toolId is hidden so a single
+// "current" column per tool stays visible.
+const previewKey = (o: typeof ORCHESTRATORS[number]) => `${o.toolId}@${o.version}`;
 
 const trackingKindLabel: Record<TrackingSourceKind, string> = {
   'release-notes': 'Release notes',
@@ -170,7 +177,14 @@ const featureCount = visibleFeatures.length;
       <table class="grid">
         <colgroup>
           <col class="col--feature" />
-          {ORCHESTRATORS.map(() => <col class="col--tool" />)}
+          {ORCHESTRATORS.map((o) => (
+            <col
+              class="col--tool"
+              data-preview-key={previewKey(o)}
+              data-tool-id={o.toolId}
+              data-version-status={isApproved(o) ? 'approved' : 'waiting-for-review'}
+            />
+          ))}
         </colgroup>
 
         <thead>
@@ -186,8 +200,15 @@ const featureCount = visibleFeatures.length;
               const versionTooltip = vd
                 ? [vd.buildHash && `(${vd.buildHash})`, vd.buildDate].filter(Boolean).join(' ')
                 : undefined;
+              const pending = !isApproved(o);
               return (
-              <th scope="col" class="cell--tool">
+              <th
+                scope="col"
+                class="cell--tool"
+                data-preview-key={previewKey(o)}
+                data-tool-id={o.toolId}
+                data-version-status={pending ? 'waiting-for-review' : 'approved'}
+              >
                 <div class="tool">
                   {/* 1/ Title */}
                   <a class="tool__name" href={o.homepage} target="_blank" rel="noreferrer">{o.toolName}</a>
@@ -349,6 +370,17 @@ const featureCount = visibleFeatures.length;
                       </p>
                     )}
                   </div>
+
+                  {/* 7/ Preview banner — last so it sits at the very bottom of
+                       the header, below warnings. */}
+                  {pending && (
+                    <p class="tool__preview-banner" role="note">
+                      <span class="tool__preview-banner-tag">Preview</span>
+                      <span class="tool__preview-banner-text">
+                        v{o.version} is waiting for review — not yet part of the public dataset.
+                      </span>
+                    </p>
+                  )}
                 </div>
               </th>
               );
@@ -364,11 +396,14 @@ const featureCount = visibleFeatures.length;
                   <span class="cell--category__label">{categoryLabel[group.category]}</span>
                   <span class="cell--category__count">{group.features.length} feature{group.features.length > 1 ? 's' : ''}</span>
                 </th>
-                {ORCHESTRATORS.map((_, i) => {
+                {ORCHESTRATORS.map((o, i) => {
                   const s = categoryScores[i][group.category];
                   return (
                     <td
                       class="cell--category-score"
+                      data-preview-key={previewKey(o)}
+                      data-tool-id={o.toolId}
+                      data-version-status={isApproved(o) ? 'approved' : 'waiting-for-review'}
                       aria-label={`${s.yes} supported plus ${s.partial} partial out of ${s.total} ${categoryLabel[group.category]} features`}
                     >
                       <div class="score score--category">
@@ -400,7 +435,13 @@ const featureCount = visibleFeatures.length;
                     const level: SupportLevel = s?.support ?? 'unknown';
                     const hasEvidence = !!(s?.sourceUrl && s?.sourceExtract);
                     return (
-                      <td class={`cell cell--${level}`} data-support={level}>
+                      <td
+                        class={`cell cell--${level}`}
+                        data-support={level}
+                        data-preview-key={previewKey(orch)}
+                        data-tool-id={orch.toolId}
+                        data-version-status={isApproved(orch) ? 'approved' : 'waiting-for-review'}
+                      >
                         <span class="cell__glyph" aria-label={supportLabel[level]} role="img">{supportGlyph[level]}</span>
                         {s?.note && <p class="cell__note">{s.note}</p>}
                         {hasEvidence && (
@@ -433,7 +474,12 @@ const featureCount = visibleFeatures.length;
     </header>
     <ul class="sources__grid" role="list">
       {ORCHESTRATORS.map((o) => (
-        <li class="sources__card">
+        <li
+          class="sources__card"
+          data-preview-key={previewKey(o)}
+          data-tool-id={o.toolId}
+          data-version-status={isApproved(o) ? 'approved' : 'waiting-for-review'}
+        >
           <h4 class="sources__tool">
             <a href={o.homepage} target="_blank" rel="noreferrer">{o.toolName}</a>
           </h4>
@@ -1114,7 +1160,101 @@ const featureCount = visibleFeatures.length;
     .feature { padding: var(--s-3); }
   }
 
+  /* ============ Preview / waiting-for-review columns ============ */
+  /* Pending columns are rendered into the table for parity with approved ones,
+     but kept out of sight until a viewer opts in via the preview query param.
+     We collapse the <col> AND set display:none on the cells so the column
+     occupies no space in either dimension. */
+  col[data-version-status="waiting-for-review"]:not([data-preview-active]) {
+    visibility: collapse;
+  }
+  [data-version-status="waiting-for-review"]:not([data-preview-active]) {
+    display: none;
+  }
+  /* Approved columns that have been superseded by an active preview for the
+     same tool: also hidden, restored if the preview is cleared. */
+  [data-version-status="approved"][data-preview-overridden] {
+    display: none;
+  }
+  col[data-version-status="approved"][data-preview-overridden] {
+    visibility: collapse;
+  }
+
+  .tool__preview-banner {
+    margin: var(--s-2) 0 0;
+    padding: var(--s-2) var(--s-3);
+    display: flex;
+    align-items: flex-start;
+    gap: var(--s-2);
+    border: 1px dashed oklch(0.55 0.16 320);
+    border-radius: var(--radius-sm, 6px);
+    background: oklch(0.25 0.08 320 / 0.35);
+    font-size: 0.7rem;
+    line-height: 1.4;
+    color: oklch(0.9 0.08 320);
+  }
+  .tool__preview-banner-tag {
+    flex-shrink: 0;
+    font-family: var(--font-display);
+    font-size: 0.6rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    padding: 2px 6px;
+    border-radius: 2px;
+    background: oklch(0.55 0.16 320);
+    color: oklch(0.12 0.02 320);
+    line-height: 1.2;
+  }
+  .tool__preview-banner-text { min-width: 0; }
+
   @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after { transition: none !important; animation: none !important; }
   }
 </style>
+
+<script>
+  // Read the preview query param (?preview=cursor@3.4.17,docker-agent@1.59.0)
+  // and toggle data-preview-active / data-preview-overridden attributes across
+  // every element that carries a data-preview-key. Keeping the toggle as a
+  // data attribute (rather than a class) means the CSS rules above stay
+  // co-located with the rest of the visibility logic.
+  (() => {
+    const raw = new URLSearchParams(window.location.search).get('preview') ?? '';
+    const requested = new Set(
+      raw
+        .split(',')
+        .map((entry) => entry.trim())
+        .filter(Boolean),
+    );
+    if (requested.size === 0) return;
+
+    const overriddenToolIds = new Set<string>();
+    for (const key of requested) {
+      const [toolId] = key.split('@');
+      if (toolId) overriddenToolIds.add(toolId);
+    }
+
+    const nodes = document.querySelectorAll<HTMLElement>('[data-preview-key]');
+    nodes.forEach((node) => {
+      const key = node.dataset.previewKey;
+      const status = node.dataset.versionStatus;
+      const toolId = node.dataset.toolId;
+      if (!key || !toolId) return;
+      if (status === 'waiting-for-review' && requested.has(key)) {
+        node.setAttribute('data-preview-active', '');
+      } else if (status === 'approved' && overriddenToolIds.has(toolId)) {
+        // Only override the approved column when a corresponding pending
+        // version for the same tool actually exists in the DOM — otherwise a
+        // typo in the query param would silently erase the approved column.
+        const hasPendingMatch = Array.from(nodes).some(
+          (n) =>
+            n.dataset.toolId === toolId &&
+            n.dataset.versionStatus === 'waiting-for-review' &&
+            requested.has(n.dataset.previewKey ?? ''),
+        );
+        if (hasPendingMatch) node.setAttribute('data-preview-overridden', '');
+      }
+    });
+  })();
+</script>

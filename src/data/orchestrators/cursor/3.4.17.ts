@@ -4,6 +4,7 @@ const data: OrchestratorVersion = {
   toolId: 'cursor',
   toolName: 'Cursor 3',
   version: '3.4.17',
+  status: 'waiting-for-review',
   releaseDate: '2026-05-13',
   homepage: 'https://cursor.com',
   vendor: 'Anysphere',

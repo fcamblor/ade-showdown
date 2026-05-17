@@ -4,6 +4,7 @@ const data: OrchestratorVersion = {
   toolId: 'docker-agent',
   toolName: 'Docker Agent (cagent)',
   version: '1.59.0',
+  status: 'waiting-for-review',
   releaseDate: '2026-05-13',
   homepage: 'https://docs.docker.com/ai/docker-agent/',
   vendor: 'Docker, Inc.',
