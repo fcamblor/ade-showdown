@@ -1,0 +1,55 @@
+import type { OrchestratorMeta } from '../../version-diff';
+
+export const META: OrchestratorMeta = {
+  toolId: 't3code',
+  toolName: 'T3 Code',
+  homepage: 'https://t3.codes/',
+  vendor: 'T3 Tools Inc',
+  pricing: 'oss',
+  pricingSource: {
+    sourceUrl: 'https://t3.codes/',
+    sourceExtract: 'MIT License · commercial-friendly. No telemetry — Unless you opt in. Full stop.',
+  },
+  platforms: ['macos', 'windows', 'linux', 'web'],
+  platformSources: {
+    macos: {
+      sourceUrl: 'https://t3.codes/download',
+      sourceExtract: 'Apple Silicon (arm64) .dmg / Intel (x64) .dmg.',
+    },
+    windows: {
+      sourceUrl: 'https://t3.codes/download',
+      sourceExtract: 'Windows 10, 11 .exe.',
+    },
+    linux: {
+      sourceUrl: 'https://t3.codes/download',
+      sourceExtract: 'x86_64 AppImage.',
+    },
+    web: {
+      sourceUrl: 'https://github.com/pingdotgg/t3code/blob/main/REMOTE.md',
+      sourceExtract:
+        'The hosted web app at `https://app.t3.codes` can save a remote backend in browser local storage from a URL like: https://app.t3.codes/pair?host=...',
+    },
+  },
+  trackingSources: [
+    {
+      kind: 'github-releases',
+      label: 't3code GitHub releases',
+      url: 'https://github.com/pingdotgg/t3code/releases',
+    },
+    {
+      kind: 'github-commits',
+      label: 't3code main commits',
+      url: 'https://github.com/pingdotgg/t3code/commits/main',
+    },
+    {
+      kind: 'docs',
+      label: 't3code README',
+      url: 'https://github.com/pingdotgg/t3code/blob/main/README.md',
+    },
+    {
+      kind: 'other',
+      label: 't3.codes homepage',
+      url: 'https://t3.codes/',
+    },
+  ],
+};

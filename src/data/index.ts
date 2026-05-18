@@ -1,7 +1,10 @@
 import type { OrchestratorVersion } from './schema';
 
+// Only version files. Files prefixed with `_` (e.g. `_meta.ts`,
+// `_latest-known-features.ts`) are pure data modules composed by version
+// files and must not be picked up as versions themselves.
 const modules = import.meta.glob<{ default: OrchestratorVersion }>(
-  './orchestrators/*/*.ts',
+  ['./orchestrators/*/*.ts', '!./orchestrators/*/_*.ts'],
   { eager: true },
 );
 
