@@ -1,9 +1,18 @@
 ---
+interface Screenshot {
+  src: string;
+  alt: string;
+  caption?: string;
+}
+
 interface Props {
   /** Short, all-lowercase reference shown in the card kicker — e.g. "vibe kanban · oss" */
   refLabel: string;
-  sourceUrl: string;
-  sourceExtract: string;
+  sourceUrl?: string;
+  sourceExtract?: string;
+  /** Optional gallery of screenshots. When present, the card widens and a near-fullscreen
+   *  preview dominates the popover; multiple entries enable a carousel. */
+  screenshots?: Screenshot[];
   /** 'cell' renders a built-in "▸ Proof" trigger. 'inline' uses the slot as the trigger
    *  (caller is responsible for the visible element — typically a pre-styled pill/flag span). */
   variant?: 'cell' | 'inline';
@@ -11,7 +20,18 @@ interface Props {
   ariaLabel?: string;
 }
 
-const { refLabel, sourceUrl, sourceExtract, variant = 'cell', ariaLabel } = Astro.props;
+const {
+  refLabel,
+  sourceUrl,
+  sourceExtract,
+  screenshots = [],
+  variant = 'cell',
+  ariaLabel,
+} = Astro.props;
+
+const shots = screenshots.filter((s) => s && s.src);
+const hasShots = shots.length > 0;
+const hasQuote = !!(sourceUrl && sourceExtract);
 
 function prettyUrl(u: string): string {
   try {
@@ -36,19 +56,109 @@ function prettyUrl(u: string): string {
       <slot />
     )}
   </summary>
-  <div class="evidence__card" role="note">
+  <div class="evidence__backdrop" data-close aria-hidden="true"></div>
+  <div
+    class={`evidence__card${hasShots ? ' evidence__card--wide' : ''}`}
+    role="dialog"
+    aria-modal="true"
+    aria-label={ariaLabel ?? `Proof — ${refLabel}`}
+  >
     <header class="evidence__head">
       <span class="evidence__kicker">On record</span>
       <span class="evidence__ref">{refLabel}</span>
     </header>
-    <blockquote class="evidence__quote">
-      <span class="evidence__quote-mark" aria-hidden="true">&ldquo;</span>
-      <p>{sourceExtract}</p>
-    </blockquote>
-    <footer class="evidence__foot">
-      <span class="evidence__foot-label">Filed at</span>
-      <a class="evidence__foot-link" href={sourceUrl} target="_blank" rel="noreferrer">{prettyUrl(sourceUrl)}</a>
-    </footer>
+    <button
+      type="button"
+      class="evidence__close"
+      data-close
+      aria-label="Close proof"
+      title="Close"
+    >
+      <span aria-hidden="true">×</span>
+    </button>
+
+    {hasShots && (
+      <div
+        class={`evidence__gallery${shots.length > 1 ? ' evidence__gallery--carousel' : ''}`}
+        data-count={shots.length}
+        data-index="0"
+        tabindex={shots.length > 1 ? 0 : undefined}
+      >
+        <div class="evidence__viewport">
+          <ul class="evidence__track" role="list">
+            {shots.map((shot, i) => (
+              <li class="evidence__slide" data-slide={i} aria-hidden={i === 0 ? 'false' : 'true'}>
+                <a
+                  class="evidence__shot-link"
+                  href={shot.src}
+                  target="_blank"
+                  rel="noreferrer"
+                  aria-label={`Open ${shot.alt} in a new tab`}
+                >
+                  <img
+                    class="evidence__shot"
+                    src={shot.src}
+                    alt={shot.alt}
+                    loading="lazy"
+                    decoding="async"
+                  />
+                </a>
+                {shot.caption && <p class="evidence__caption">{shot.caption}</p>}
+              </li>
+            ))}
+          </ul>
+          {shots.length > 1 && (
+            <>
+              <button
+                type="button"
+                class="evidence__nav evidence__nav--prev"
+                data-dir="-1"
+                aria-label="Previous screenshot"
+              >‹</button>
+              <button
+                type="button"
+                class="evidence__nav evidence__nav--next"
+                data-dir="1"
+                aria-label="Next screenshot"
+              >›</button>
+              <div class="evidence__counter" aria-live="polite">
+                <span class="evidence__counter-current">1</span>
+                <span class="evidence__counter-sep" aria-hidden="true">/</span>
+                <span class="evidence__counter-total">{shots.length}</span>
+              </div>
+            </>
+          )}
+        </div>
+        {shots.length > 1 && (
+          <ol class="evidence__dots" role="list">
+            {shots.map((_, i) => (
+              <li>
+                <button
+                  type="button"
+                  class="evidence__dot"
+                  data-goto={i}
+                  aria-label={`Go to screenshot ${i + 1}`}
+                  aria-current={i === 0 ? 'true' : 'false'}
+                ></button>
+              </li>
+            ))}
+          </ol>
+        )}
+      </div>
+    )}
+
+    {hasQuote && (
+      <blockquote class="evidence__quote">
+        <span class="evidence__quote-mark" aria-hidden="true">&ldquo;</span>
+        <p>{sourceExtract}</p>
+      </blockquote>
+    )}
+    {sourceUrl && (
+      <footer class="evidence__foot">
+        <span class="evidence__foot-label">Filed at</span>
+        <a class="evidence__foot-link" href={sourceUrl} target="_blank" rel="noreferrer">{prettyUrl(sourceUrl)}</a>
+      </footer>
+    )}
   </div>
 </details>
 
@@ -70,14 +180,11 @@ function prettyUrl(u: string): string {
     line-height: 1;
   }
   .evidence--inline > .evidence__trigger {
-    /* Trigger styling comes from the caller-provided triggerClass.
-       We just neutralise summary's default `list-item` display and hint at interactivity. */
     display: inline-flex;
     align-items: center;
     position: relative;
   }
   .evidence--inline > .evidence__trigger > *::after {
-    /* tiny disclosure caret rendered inside the pill itself */
     content: '▾';
     display: inline-block;
     margin-left: 5px;
@@ -128,20 +235,63 @@ function prettyUrl(u: string): string {
   .evidence--cell[open] .evidence__chevron { transform: rotate(45deg); }
   .evidence__trigger-label { display: inline-block; }
 
-  /* Card — paper clipping pulled out of the trigger. */
+  /* ---------- Centered modal: backdrop ---------- */
+  .evidence__backdrop { display: none; }
+  .evidence[open] > .evidence__backdrop,
+  .evidence[data-closing] > .evidence__backdrop {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 998;
+    background:
+      radial-gradient(ellipse at center, oklch(0.10 0.02 35 / 0.55), oklch(0.06 0.015 35 / 0.78));
+    backdrop-filter: blur(2px) saturate(0.85);
+    -webkit-backdrop-filter: blur(2px) saturate(0.85);
+    cursor: zoom-out;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    /* The open-in animation is bound to the [open] selector itself so it runs
+     * on the same paint that reveals the element — no JS gating, no flicker. */
+    .evidence[open]:not([data-closing]) > .evidence__backdrop {
+      animation: evidenceBackdropIn .30s cubic-bezier(0.22, 1, 0.36, 1) both;
+    }
+    .evidence[data-closing] > .evidence__backdrop {
+      animation: evidenceBackdropOut .22s cubic-bezier(0.5, 0, 0.75, 0) both;
+    }
+    @keyframes evidenceBackdropIn {
+      from {
+        opacity: 0;
+        backdrop-filter: blur(0) saturate(1);
+        -webkit-backdrop-filter: blur(0) saturate(1);
+      }
+      to {
+        opacity: 1;
+        backdrop-filter: blur(2px) saturate(0.85);
+        -webkit-backdrop-filter: blur(2px) saturate(0.85);
+      }
+    }
+    @keyframes evidenceBackdropOut {
+      from { opacity: 1; }
+      to   { opacity: 0; }
+    }
+  }
+
+  /* ---------- Centered modal: card ---------- */
   .evidence__card {
-    position: absolute;
-    top: 100%;
-    left: 0;
-    margin-top: var(--s-2);
-    z-index: 20;
-    width: clamp(280px, 22rem, calc(100vw - 32px));
-    padding: var(--s-4);
+    /* Sized for the centered overlay. Override the previous absolute-popover sizing. */
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 999;
+    width: min(640px, 92vw);
+    max-height: min(88vh, 900px);
+    overflow: auto;
+    padding: var(--s-4) var(--s-5);
     color: oklch(0.22 0.025 35);
     font-family: var(--font-body);
-    font-size: 0.875rem;
-    line-height: 1.5;
-    /* Halftone-tinted cream paper */
+    font-size: 0.92rem;
+    line-height: 1.55;
     background:
       radial-gradient(circle at 22% 28%, oklch(0 0 0 / 0.045) 0.5px, transparent 1.2px),
       radial-gradient(circle at 76% 78%, oklch(0 0 0 / 0.035) 0.5px, transparent 1.2px),
@@ -151,21 +301,117 @@ function prettyUrl(u: string): string {
     box-shadow:
       0 1px 0 oklch(1 0 0 / 0.6) inset,
       0 0 0 1px oklch(0.52 0.05 60 / 0.18),
-      0 18px 32px -14px oklch(0 0 0 / 0.7),
-      0 4px 10px -4px oklch(0 0 0 / 0.4);
+      0 32px 64px -18px oklch(0 0 0 / 0.85),
+      0 8px 18px -6px oklch(0 0 0 / 0.45);
     text-align: left;
     white-space: normal;
   }
-  /* Anchor right edge in the last data column so the card doesn't escape the viewport */
-  td:last-child .evidence__card,
-  th:last-child .evidence__card { left: auto; right: 0; }
+  /* Wide variant: when the card hosts screenshots, claim nearly the whole viewport. */
+  .evidence__card--wide {
+    width: min(1280px, calc(100vw - 64px));
+    max-height: calc(100vh - 64px);
+    padding: var(--s-4) var(--s-5);
+  }
+
+  /* The card stays mounted during the out animation by virtue of [data-closing]
+   * keeping the element rendered while [open] is still true on the <details>. */
+  .evidence[data-closing] > .evidence__card { display: block; }
 
   @media (prefers-reduced-motion: no-preference) {
-    .evidence[open] .evidence__card { animation: evidenceAppear .24s cubic-bezier(0.22, 1, 0.36, 1); }
-    @keyframes evidenceAppear {
-      from { opacity: 0; transform: translateY(-6px); }
+    /* Bound to [open] so the animation starts on the same paint that mounts
+     * the card — prevents a flash of fully-rendered card before the animation
+     * starts. */
+    .evidence[open]:not([data-closing]) > .evidence__card {
+      animation: evidenceCardIn .44s cubic-bezier(0.16, 1, 0.3, 1) both;
+      transform-origin: 50% 30%;
+      will-change: transform, opacity, filter;
+    }
+    .evidence[data-closing] > .evidence__card {
+      animation: evidenceCardOut .26s cubic-bezier(0.5, 0, 0.75, 0) both;
+      transform-origin: 50% 30%;
+      will-change: transform, opacity, filter;
+    }
+    /* The clipping drops in with a touch of blur (as if focusing into view),
+     * settles with a faint counter-rotation — paper flicked onto the desk. */
+    @keyframes evidenceCardIn {
+      0% {
+        opacity: 0;
+        transform: translate(-50%, calc(-50% + 26px)) scale(.94) rotate(-.8deg);
+        filter: blur(3px);
+      }
+      55% { filter: blur(0); }
+      100% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1) rotate(0);
+        filter: blur(0);
+      }
+    }
+    @keyframes evidenceCardOut {
+      from {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1) rotate(0);
+        filter: blur(0);
+      }
+      to {
+        opacity: 0;
+        transform: translate(-50%, calc(-50% + 14px)) scale(.97) rotate(.5deg);
+        filter: blur(1.5px);
+      }
+    }
+    /* Stagger child reveals so the body composes itself after the card lands. */
+    .evidence[open]:not([data-closing]) > .evidence__card > .evidence__head,
+    .evidence[open]:not([data-closing]) > .evidence__card > .evidence__gallery,
+    .evidence[open]:not([data-closing]) > .evidence__card > .evidence__quote,
+    .evidence[open]:not([data-closing]) > .evidence__card > .evidence__foot {
+      animation: evidenceChildIn .42s cubic-bezier(0.22, 1, 0.36, 1) both;
+    }
+    .evidence[open]:not([data-closing]) > .evidence__card > .evidence__head    { animation-delay: 80ms; }
+    .evidence[open]:not([data-closing]) > .evidence__card > .evidence__gallery { animation-delay: 140ms; }
+    .evidence[open]:not([data-closing]) > .evidence__card > .evidence__quote   { animation-delay: 200ms; }
+    .evidence[open]:not([data-closing]) > .evidence__card > .evidence__foot    { animation-delay: 260ms; }
+    @keyframes evidenceChildIn {
+      from { opacity: 0; transform: translateY(6px); }
       to   { opacity: 1; transform: translateY(0); }
     }
+  }
+  /* Trigger chevron animates in sync with open state. */
+  .evidence__chevron { transition: transform .22s cubic-bezier(0.22, 1, 0.36, 1); }
+
+  /* Close affordance — a small red stamp mark, top-right of the card. */
+  .evidence__close {
+    appearance: none;
+    border: 0;
+    background: transparent;
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    width: 32px;
+    height: 32px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-display);
+    font-size: 1.6rem;
+    font-weight: 700;
+    line-height: 1;
+    color: oklch(0.46 0.16 28);
+    cursor: pointer;
+    border-radius: 50%;
+    transition: background-color .12s ease, color .12s ease, transform .18s ease;
+  }
+  .evidence__close > span {
+    display: block;
+    transform: translateY(-1px);
+  }
+  .evidence__close:hover,
+  .evidence__close:focus-visible {
+    background: oklch(0.46 0.16 28);
+    color: oklch(0.98 0.01 60);
+    transform: rotate(90deg);
+    outline: none;
+  }
+  .evidence__close:focus-visible {
+    box-shadow: 0 0 0 2px oklch(0.98 0.01 60), 0 0 0 4px oklch(0.46 0.16 28);
   }
 
   .evidence__head {
@@ -174,6 +420,7 @@ function prettyUrl(u: string): string {
     justify-content: space-between;
     gap: var(--s-3);
     margin-bottom: var(--s-3);
+    padding-right: 40px; /* room for the close button */
     padding-bottom: var(--s-2);
     border-bottom: 1px dashed oklch(0.62 0.04 60 / 0.55);
   }
@@ -181,7 +428,7 @@ function prettyUrl(u: string): string {
     font-family: var(--font-display);
     text-transform: uppercase;
     letter-spacing: 0.32em;
-    font-size: 0.66rem;
+    font-size: 0.7rem;
     font-weight: 900;
     color: oklch(0.46 0.16 28);
   }
@@ -189,7 +436,7 @@ function prettyUrl(u: string): string {
     font-family: var(--font-display);
     text-transform: uppercase;
     letter-spacing: 0.16em;
-    font-size: 0.55rem;
+    font-size: 0.6rem;
     font-weight: 700;
     color: oklch(0.42 0.03 60 / 0.85);
     text-align: right;
@@ -201,6 +448,7 @@ function prettyUrl(u: string): string {
     padding: 0 0 0 var(--s-5);
     position: relative;
   }
+  .evidence__card--wide .evidence__quote { margin-top: var(--s-4); }
   .evidence__quote-mark {
     position: absolute;
     left: -4px;
@@ -226,7 +474,7 @@ function prettyUrl(u: string): string {
     align-items: baseline;
     flex-wrap: wrap;
     gap: 6px;
-    font-size: 0.72rem;
+    font-size: 0.78rem;
   }
   .evidence__foot-label {
     font-family: var(--font-display);
@@ -234,7 +482,7 @@ function prettyUrl(u: string): string {
     letter-spacing: 0.2em;
     font-weight: 800;
     color: oklch(0.46 0.04 50);
-    font-size: 0.6rem;
+    font-size: 0.62rem;
     flex-shrink: 0;
   }
   .evidence__foot-link {
@@ -252,8 +500,329 @@ function prettyUrl(u: string): string {
     text-decoration-color: currentColor;
   }
 
+  /* ============ Screenshot gallery ============ */
+  .evidence__gallery {
+    margin: 0 0 var(--s-3) 0;
+    outline: none;
+  }
+  .evidence__viewport {
+    position: relative;
+    overflow: hidden;
+    background: oklch(0.16 0.01 35);
+    border-radius: 2px;
+    box-shadow:
+      0 0 0 1px oklch(0.52 0.05 60 / 0.25),
+      inset 0 0 0 1px oklch(1 0 0 / 0.04);
+  }
+  .evidence__track {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    width: 100%;
+    transition: transform .35s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .evidence__track { transition: none; }
+  }
+  .evidence__slide {
+    flex: 0 0 100%;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .evidence__shot-link {
+    display: block;
+    line-height: 0;
+    cursor: zoom-in;
+    /* Reserve maximum room for the image inside the card. The minimums (calc with
+     * vw/vh) preserve breathing room around the wide card so the screenshot never
+     * goes 100% full-bleed. */
+    background: oklch(0.12 0.01 35);
+  }
+  .evidence__shot {
+    display: block;
+    width: 100%;
+    height: auto;
+    max-height: min(80vh, calc(100vh - 220px));
+    object-fit: contain;
+    background: oklch(0.12 0.01 35);
+  }
+  .evidence__caption {
+    margin: 0;
+    padding: var(--s-2) var(--s-3);
+    font-size: 0.8rem;
+    font-style: italic;
+    color: oklch(0.88 0.015 60);
+    background: oklch(0.20 0.015 35);
+    border-top: 1px solid oklch(0.30 0.02 35);
+  }
+
+  /* Carousel chrome: arrows overlaid on the viewport, dots below. */
+  .evidence__nav {
+    appearance: none;
+    border: 1px solid oklch(1 0 0 / 0.15);
+    background: oklch(0.10 0.01 35 / 0.65);
+    color: oklch(0.96 0.01 60);
+    width: 40px;
+    height: 40px;
+    border-radius: 999px;
+    font-size: 1.4rem;
+    line-height: 1;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    transition:
+      background-color .14s ease,
+      border-color .14s ease,
+      color .14s ease,
+      transform .14s ease;
+    z-index: 2;
+  }
+  .evidence__nav--prev { left: 10px; }
+  .evidence__nav--next { right: 10px; }
+  .evidence__nav:hover,
+  .evidence__nav:focus-visible {
+    background: oklch(0.50 0.18 28);
+    border-color: oklch(0.50 0.18 28);
+    color: oklch(0.98 0 0);
+    outline: none;
+  }
+  .evidence__nav--prev:hover,
+  .evidence__nav--prev:focus-visible { transform: translateY(-50%) translateX(-2px); }
+  .evidence__nav--next:hover,
+  .evidence__nav--next:focus-visible { transform: translateY(-50%) translateX(2px); }
+
+  .evidence__counter {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    z-index: 2;
+    padding: 4px 10px;
+    border-radius: 999px;
+    background: oklch(0.10 0.01 35 / 0.7);
+    color: oklch(0.94 0.01 60);
+    font-family: var(--font-display);
+    font-size: 0.66rem;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    border: 1px solid oklch(1 0 0 / 0.1);
+    display: inline-flex;
+    align-items: baseline;
+    gap: 3px;
+    line-height: 1;
+  }
+  .evidence__counter-sep { opacity: 0.5; }
+
+  .evidence__dots {
+    margin: var(--s-3) 0 0 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+  .evidence__dot {
+    appearance: none;
+    border: 0;
+    padding: 0;
+    width: 8px;
+    height: 8px;
+    border-radius: 999px;
+    background: oklch(0.52 0.05 60 / 0.4);
+    cursor: pointer;
+    transition: background-color .14s ease, transform .14s ease, width .18s ease;
+  }
+  .evidence__dot:hover { background: oklch(0.50 0.18 28 / 0.7); }
+  .evidence__dot[aria-current="true"] {
+    background: oklch(0.50 0.18 28);
+    width: 22px;
+    border-radius: 4px;
+  }
+
   @media (max-width: 720px) {
-    .evidence__card { width: clamp(240px, 88vw, 320px); padding: var(--s-3); }
+    .evidence__card {
+      width: calc(100vw - 24px);
+      max-height: calc(100vh - 24px);
+      padding: var(--s-3) var(--s-4);
+      font-size: 0.88rem;
+    }
+    .evidence__card--wide {
+      width: calc(100vw - 16px);
+      max-height: calc(100vh - 16px);
+    }
+    .evidence__shot { max-height: min(60vh, calc(100vh - 200px)); }
     .evidence__quote-mark { font-size: 2.2rem; top: -10px; }
+    .evidence__nav { width: 34px; height: 34px; font-size: 1.2rem; }
+    .evidence__nav--prev { left: 6px; }
+    .evidence__nav--next { right: 6px; }
   }
 </style>
+
+<script>
+  // Evidence behaviour: centered modal popover with backdrop, close button,
+  // ESC dismissal, and per-instance carousel.
+  (() => {
+    type Carousel = {
+      gallery: HTMLElement;
+      track: HTMLElement;
+      slides: HTMLElement[];
+      dots: HTMLButtonElement[];
+      counterEl: HTMLElement | null;
+      count: number;
+      index: number;
+    };
+
+    const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    // Must match the CSS keyframes (evidenceCardOut).
+    const CLOSE_MS = 280;
+
+    const syncBodyLock = () => {
+      const anyOpen = !!document.querySelector('details.evidence[open]');
+      document.body.classList.toggle('evidence-open', anyOpen);
+      document.body.style.overflow = anyOpen ? 'hidden' : '';
+    };
+
+    const animatedClose = (details: HTMLDetailsElement) => {
+      if (!details.open || details.dataset.closing === 'true') return;
+      const trigger = details.querySelector<HTMLElement>('.evidence__trigger');
+      if (reducedMotion) {
+        details.open = false;
+        syncBodyLock();
+        trigger?.focus({ preventScroll: true });
+        return;
+      }
+      details.dataset.closing = 'true';
+      window.setTimeout(() => {
+        delete details.dataset.closing;
+        details.open = false;
+        syncBodyLock();
+        trigger?.focus({ preventScroll: true });
+      }, CLOSE_MS);
+    };
+
+    // ---------- Close affordances (×, backdrop) ----------
+    document.addEventListener('click', (ev) => {
+      const target = ev.target as HTMLElement | null;
+      if (!target) return;
+      const closer = target.closest<HTMLElement>('[data-close]');
+      if (!closer) return;
+      const details = closer.closest<HTMLDetailsElement>('details.evidence');
+      if (!details) return;
+      ev.preventDefault();
+      animatedClose(details);
+    });
+
+    // ESC — close the topmost open proof.
+    document.addEventListener('keydown', (ev) => {
+      if (ev.key !== 'Escape') return;
+      const openOne = document.querySelector<HTMLDetailsElement>('details.evidence[open]');
+      if (!openOne) return;
+      ev.preventDefault();
+      animatedClose(openOne);
+    });
+
+    // Intercept summary clicks on an already-open proof so we can play the
+    // close animation before the native <details> snaps shut.
+    document.querySelectorAll<HTMLDetailsElement>('details.evidence').forEach((details) => {
+      const summary = details.querySelector<HTMLElement>('.evidence__trigger');
+      summary?.addEventListener('click', (ev) => {
+        if (details.open || details.dataset.closing === 'true') {
+          ev.preventDefault();
+          if (details.dataset.closing !== 'true') animatedClose(details);
+        }
+      });
+
+      details.addEventListener('toggle', () => {
+        syncBodyLock();
+        if (details.open && details.dataset.closing !== 'true') {
+          const closeBtn = details.querySelector<HTMLButtonElement>('.evidence__close');
+          requestAnimationFrame(() => closeBtn?.focus({ preventScroll: true }));
+        }
+      });
+    });
+
+    // ---------- Carousels ----------
+    const carousels: Carousel[] = [];
+    document.querySelectorAll<HTMLElement>('.evidence__gallery--carousel').forEach((gallery) => {
+      const track = gallery.querySelector<HTMLElement>('.evidence__track');
+      const slides = Array.from(gallery.querySelectorAll<HTMLElement>('.evidence__slide'));
+      const dots = Array.from(gallery.querySelectorAll<HTMLButtonElement>('.evidence__dot'));
+      const counterEl = gallery.querySelector<HTMLElement>('.evidence__counter-current');
+      if (!track || slides.length === 0) return;
+      carousels.push({
+        gallery, track, slides, dots, counterEl,
+        count: slides.length,
+        index: 0,
+      });
+    });
+
+    const apply = (c: Carousel) => {
+      c.track.style.transform = `translateX(-${c.index * 100}%)`;
+      c.slides.forEach((s, i) => s.setAttribute('aria-hidden', i === c.index ? 'false' : 'true'));
+      c.dots.forEach((d, i) => d.setAttribute('aria-current', i === c.index ? 'true' : 'false'));
+      if (c.counterEl) c.counterEl.textContent = String(c.index + 1);
+      c.gallery.dataset.index = String(c.index);
+    };
+
+    carousels.forEach((c) => {
+      c.gallery.querySelectorAll<HTMLButtonElement>('.evidence__nav').forEach((btn) => {
+        btn.addEventListener('click', (ev) => {
+          ev.preventDefault();
+          ev.stopPropagation();
+          const dir = Number(btn.dataset.dir ?? '1');
+          c.index = (c.index + dir + c.count) % c.count;
+          apply(c);
+        });
+      });
+      c.dots.forEach((dot) => {
+        dot.addEventListener('click', (ev) => {
+          ev.preventDefault();
+          ev.stopPropagation();
+          const goto = Number(dot.dataset.goto ?? '0');
+          if (Number.isFinite(goto)) {
+            c.index = Math.max(0, Math.min(c.count - 1, goto));
+            apply(c);
+          }
+        });
+      });
+      c.gallery.addEventListener('keydown', (ev) => {
+        if (ev.key === 'ArrowLeft') {
+          c.index = (c.index - 1 + c.count) % c.count;
+          apply(c);
+        } else if (ev.key === 'ArrowRight') {
+          c.index = (c.index + 1) % c.count;
+          apply(c);
+        }
+      });
+    });
+
+    // Global arrow-key navigation when a proof with a carousel is open and the
+    // close button (or another non-gallery element) has focus.
+    document.addEventListener('keydown', (ev) => {
+      if (ev.key !== 'ArrowLeft' && ev.key !== 'ArrowRight') return;
+      const openOne = document.querySelector<HTMLDetailsElement>('details.evidence[open]');
+      if (!openOne) return;
+      const target = ev.target as HTMLElement | null;
+      if (target?.closest('.evidence__gallery')) return; // already handled
+      const carousel = carousels.find((c) => openOne.contains(c.gallery));
+      if (!carousel) return;
+      ev.preventDefault();
+      const dir = ev.key === 'ArrowLeft' ? -1 : 1;
+      carousel.index = (carousel.index + dir + carousel.count) % carousel.count;
+      apply(carousel);
+    });
+  })();
+</script>

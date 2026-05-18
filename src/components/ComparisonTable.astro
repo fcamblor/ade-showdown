@@ -510,7 +510,7 @@ const featureCount = visibleFeatures.length;
                   {ORCHESTRATORS.map((orch, i) => {
                     const s = findSupport(i, feature.id);
                     const level: SupportLevel = s?.support ?? 'unknown';
-                    const hasEvidence = !!(s?.sourceUrl && s?.sourceExtract);
+                    const hasEvidence = !!(s?.sourceUrl && s?.sourceExtract) || (s?.screenshots?.length ?? 0) > 0;
                     return (
                       <td
                         class={`cell cell--${level}`}
@@ -525,8 +525,9 @@ const featureCount = visibleFeatures.length;
                           <Evidence
                             variant="cell"
                             refLabel={`${orch.toolId.replace(/-/g, ' ')} · ${feature.id.replace(/-/g, ' ')}`}
-                            sourceUrl={s!.sourceUrl!}
-                            sourceExtract={s!.sourceExtract!}
+                            sourceUrl={s?.sourceUrl}
+                            sourceExtract={s?.sourceExtract}
+                            screenshots={s?.screenshots}
                             ariaLabel={`Show source for ${feature.label} on ${orch.toolName}`}
                           />
                         )}
