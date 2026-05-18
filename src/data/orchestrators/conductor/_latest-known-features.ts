@@ -425,6 +425,10 @@ export const LATEST_KNOWN_FEATURES: FeatureSupport[] = [
         src: '/screenshots/conductor/pr-status-sync_git-settings_20260518_1.png',
         alt: 'Conductor Git settings panel exposing Archive on merge and Delete branch on archive toggles',
       },
+      {
+        src: '/screenshots/conductor/pr-status-sync_pr-link_20260518_1.png',
+        alt: 'Chat showing the PR link surfaced after creation, with the workspace header reflecting the synced Ready to merge state and Merge conflicts tab',
+      },
     ],
     sourceUrl: 'https://www.conductor.build/changelog',
     sourceExtract:
