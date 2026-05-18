@@ -233,13 +233,32 @@ YOUR JOB (do all of this yourself; the main agent will not intervene):
      (also ≤4 options) to pick between: Skip for now / Mark unknown /
      Request prior-decisions recap (then re-ask) / Pause.
 
-  5. If "Edit manually" or if the user wants to attach screenshots/sources,
-     collect (one sub-question at a time, AskUserQuestion for closed enums):
+  5. If "Edit manually", collect (one sub-question at a time,
+     AskUserQuestion for closed enums):
        - support (yes/partial/no/unknown)
        - note (free-form, ≤ 280 chars, optional)
        - sourceUrl (free-form, URL, required when support ∈ {yes, partial})
        - sourceExtract (free-form, verbatim, required when support ∈ {yes, partial})
-       - "Any screenshots to attach? Paste absolute paths (one per line) or leave blank."
+
+     Otherwise ("Keep current" or "Accept research proposal"), the
+     FeatureSupport object is already determined — no extra fields to
+     collect at this point.
+
+  5-bis. Screenshot prompt (UNCONDITIONAL when supported).
+
+     Compute the final `support` value (from the locked-in verdict — kept,
+     accepted, or just edited). If `support ∈ {yes, partial}`, ALWAYS ask
+     the user — regardless of which branch led here:
+
+       free-form question: "Any screenshots to attach for <featureId>?
+                            Paste absolute paths (one per line) or leave
+                            blank to skip."
+
+     A blank answer means "skip". For any non-blank answer, proceed to
+     step 6 to ingest the files.
+
+     When `support ∈ {no, unknown}`, skip this prompt (screenshots are
+     not meaningful for unsupported features).
 
   6. For each screenshot path the user provides:
        a. Verify the file exists (Read it to confirm — this DOES load image bytes
@@ -313,6 +332,7 @@ The main agent does **not** re-read `_latest-known-features.ts` between iteratio
 - Subagent prompts must not include the user's prior screenshots verbatim — only the count, filenames, and `src` references already in the entry.
 - **Display-inside-question invariant.** Subagent `text` messages are NOT relayed to the user — only the `question` field of `AskUserQuestion` reaches them. The "Current persisted state" and "Research outcome" blocks MUST therefore be embedded inside the `question` text passed to `AskUserQuestion`, not merely emitted as assistant prose. The subagent prompt enforces this explicitly; the main agent does not need to re-validate, but if the user reports missing context the first thing to check is whether a subagent reverted to the old "print blocks then ask a short question" pattern.
 - **AskUserQuestion option cap.** The host's `AskUserQuestion` rejects more than 4 options per question. The subagent prompt is already capped at 4; if you ever extend it, split into a follow-up question rather than growing the list.
+- **Screenshot opportunity invariant.** Whenever the final verdict has `support ∈ {yes, partial}`, the subagent MUST unconditionally ask the user for screenshot paths before persisting — regardless of whether the verdict was Kept, Accepted, or Edited. A blank answer skips. Earlier revisions of this skill only offered screenshot collection inside the "Edit manually" branch, leaving accepted/kept verdicts without any path to evidence — that is the bug step 5-bis fixes.
 
 ---
 
