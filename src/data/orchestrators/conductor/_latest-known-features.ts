@@ -10,7 +10,12 @@ export const LATEST_KNOWN_FEATURES: FeatureSupport[] = [
   {
     featureId: 'git-worktrees',
     support: 'yes',
-    screenshots: [],
+    screenshots: [
+      {
+        src: '/screenshots/conductor/git-worktrees_20260518_1.png',
+        alt: "Vue Conductor montrant l'isolation par git worktree",
+      },
+    ],
     sourceUrl: 'https://www.conductor.build/docs/concepts/workspaces-and-branches',
     sourceExtract:
       'An isolated workspace is a separate, git-backed copy of a project for one stream of work. […] The files on disk for one workspace. Each workspace has its own working tree.',
