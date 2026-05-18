@@ -411,7 +411,7 @@ export const LATEST_KNOWN_FEATURES: FeatureSupport[] = [
   {
     featureId: 'pr-status-sync',
     support: 'yes',
-    note: 'PR state (checks, merge status) tracked in the Checks tab and git panel; manual merge available from the workspace; "Archive on merge" + "Delete branch on archive" toggles in Git settings auto-archive the worktree on merge (covers in-app and external merges since v0.33.5; Unarchive action added in v0.50.0).',
+    note: 'Checks and merge state tracked in-app; manual merge from the workspace; "Archive on merge" + "Delete branch on archive" toggles auto-archive on in-app and external merges (Unarchive action since v0.50.0).',
     screenshots: [
       {
         src: '/screenshots/conductor/pr-status-sync_ready-to-merge_20260518_1.png',
