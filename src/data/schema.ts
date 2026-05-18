@@ -1,4 +1,9 @@
 import { z } from 'zod';
+import { FEATURE_IDS, type FeatureId } from './feature-ids';
+
+export { FEATURE_IDS, type FeatureId };
+
+export const FeatureIdSchema = z.enum(FEATURE_IDS);
 
 export const FeatureCategorySchema = z.enum([
   'workflow',
@@ -12,7 +17,7 @@ export const FeatureCategorySchema = z.enum([
 export type FeatureCategory = z.infer<typeof FeatureCategorySchema>;
 
 export const FeatureSchema = z.object({
-  id: z.string().regex(/^[a-z0-9-]+$/),
+  id: FeatureIdSchema,
   label: z.string(),
   category: FeatureCategorySchema,
   shortDescription: z.string(),
@@ -30,7 +35,7 @@ export const ScreenshotSchema = z.object({
 });
 
 export const FeatureSupportSchema = z.object({
-  featureId: z.string(),
+  featureId: FeatureIdSchema,
   support: SupportLevelSchema,
   note: z.string().max(280).optional(),
   screenshots: z.array(ScreenshotSchema).default([]),

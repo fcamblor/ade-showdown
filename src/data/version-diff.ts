@@ -1,4 +1,4 @@
-import type { FeatureSupport, OrchestratorVersion } from './schema';
+import type { FeatureId, FeatureSupport, OrchestratorVersion } from './schema';
 
 // Tool-level metadata: every field of an OrchestratorVersion that does not
 // change across versions of the same tool. A `meta.ts` per orchestrator
@@ -17,8 +17,8 @@ export type OrchestratorMeta = Omit<
 //   - `add`:      the feature existed only in this version (rare — typically
 //                 used when a feature was later removed from the product).
 export type FeatureDiff =
-  | { remove: string }
-  | { override: string; with: Partial<Omit<FeatureSupport, 'featureId'>> }
+  | { remove: FeatureId }
+  | { override: FeatureId; with: Partial<Omit<FeatureSupport, 'featureId'>> }
   | { add: FeatureSupport };
 
 // Apply an ordered list of diffs to a baseline (usually the latest version's
