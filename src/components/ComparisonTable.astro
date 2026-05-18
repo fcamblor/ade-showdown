@@ -663,7 +663,7 @@ const featureCount = visibleFeatures.length;
 
   /* Column widths — fixed-layout means these are authoritative */
   .col--feature { width: 300px; }
-  .col--tool    { width: 200px; }
+  .col--tool    { width: 230px; }
 
   /* ============ Cells ============ */
   th, td {
@@ -1118,8 +1118,9 @@ const featureCount = visibleFeatures.length;
   .row--feature:nth-child(even) .cell--partial { background: color-mix(in oklch, var(--cell-partial) 60%, var(--bg-row-alt)); }
 
   /* Highlight the row on hover for cross-reference */
-  .row--feature:hover .cell--feature,
   .row--feature:hover .cell { background-color: oklch(0.25 0.018 28 / 0.45); }
+  .row--feature:hover .cell--feature { background-color: color-mix(in oklch, oklch(0.25 0.018 28) 45%, var(--bg)); }
+  .row--feature:nth-child(even):hover .cell--feature { background-color: color-mix(in oklch, oklch(0.25 0.018 28) 45%, var(--bg-row-alt)); }
   .row--feature:hover .cell--yes     { background-color: color-mix(in oklch, var(--cell-yes) 75%, oklch(0.25 0.018 28)); }
   .row--feature:hover .cell--no      { background-color: color-mix(in oklch, var(--cell-no) 75%, oklch(0.25 0.018 28)); }
   .row--feature:hover .cell--partial { background-color: color-mix(in oklch, var(--cell-partial) 75%, oklch(0.25 0.018 28)); }
@@ -1296,7 +1297,7 @@ const featureCount = visibleFeatures.length;
 
   @media (max-width: 720px) {
     .col--feature { width: 220px; }
-    .col--tool { width: 170px; }
+    .col--tool { width: 195px; }
     .tool__name {
       min-height: 2.4rem;
       font-size: 1.2rem;
