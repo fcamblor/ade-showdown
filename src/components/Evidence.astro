@@ -237,6 +237,13 @@ function prettyUrl(u: string): string {
 
   /* ---------- Centered modal: backdrop ---------- */
   .evidence__backdrop { display: none; }
+
+  /* Skip rendering (and browser find-in-page indexing) of proof content while
+   * the <details> is closed. Without this, Chrome's "find in page" matches text
+   * inside the closed card and force-opens the proof. */
+  .evidence:not([open]):not([data-closing]) > .evidence__card {
+    content-visibility: hidden;
+  }
   .evidence[open] > .evidence__backdrop,
   .evidence[data-closing] > .evidence__backdrop {
     display: block;
