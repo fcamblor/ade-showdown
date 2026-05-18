@@ -51,6 +51,43 @@ function prettyUrl(u: string): string {
       <>
         <span class="evidence__chevron" aria-hidden="true"></span>
         <span class="evidence__trigger-label">Proof</span>
+        {hasShots && (
+          <span
+            class="evidence__shot-badge"
+            aria-label={`${shots.length} screenshot${shots.length > 1 ? 's' : ''} available`}
+            title={`${shots.length} screenshot${shots.length > 1 ? 's' : ''}`}
+          >
+            <svg
+              class="evidence__shot-badge-icon"
+              viewBox="0 0 24 24"
+              width="12"
+              height="12"
+              aria-hidden="true"
+              focusable="false"
+            >
+              {/* Two overlapping UI windows — back frame + front frame with a
+                  title bar dot. Reads as "captured screens" rather than camera. */}
+              <rect
+                x="3.5" y="6.5" width="12" height="10" rx="1.4"
+                fill="none" stroke="currentColor" stroke-width="1.4"
+                opacity="0.55"
+              />
+              <rect
+                x="8.5" y="9.5" width="12" height="10" rx="1.4"
+                fill="currentColor" fill-opacity="0.14"
+                stroke="currentColor" stroke-width="1.4"
+              />
+              <line
+                x1="8.5" y1="12.4" x2="20.5" y2="12.4"
+                stroke="currentColor" stroke-width="1.4" opacity="0.85"
+              />
+              <circle cx="10.6" cy="10.95" r="0.7" fill="currentColor" />
+            </svg>
+            {shots.length > 1 && (
+              <span class="evidence__shot-badge-count">{shots.length}</span>
+            )}
+          </span>
+        )}
       </>
     ) : (
       <slot />
@@ -214,7 +251,10 @@ function prettyUrl(u: string): string {
     line-height: 1;
     letter-spacing: 0.22em;
     text-transform: uppercase;
-    color: var(--fg-faint);
+    /* Warm parchment tone — same hue family as the screenshot badge so the
+     * label + badge read as a single typeset mark, and contrast holds on every
+     * support-state cell background. */
+    color: oklch(0.78 0.045 80);
     transition: color .12s ease;
   }
   .evidence--cell > .evidence__trigger:hover,
@@ -234,6 +274,54 @@ function prettyUrl(u: string): string {
   }
   .evidence--cell[open] .evidence__chevron { transform: rotate(45deg); }
   .evidence__trigger-label { display: inline-block; }
+
+  /* Tiny badge next to the "Proof" label hinting that screenshots are attached.
+   *
+   * Reads as a small parchment tab clipped onto the cell. Light, warm fill
+   * guarantees ≥4.5:1 luminance contrast against ALL four support-state cells
+   * (all L≈0.22–0.28), regardless of their hue — green "yes", amber "partial",
+   * red "no", or slate "unknown". Re-uses the brand canvas color so the badge
+   * looks like a torn-paper sticker on the dossier. */
+  .evidence__shot-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    margin-left: 5px;
+    padding: 2px 5px 2px 4px;
+    border-radius: 2px;
+    background: oklch(0.92 0.04 80);
+    color: oklch(0.32 0.045 45);
+    line-height: 1;
+    letter-spacing: 0;
+    box-shadow:
+      inset 0 0 0 1px oklch(0.55 0.05 55 / 0.45),
+      0 1px 0 oklch(0 0 0 / 0.22);
+    transition:
+      background-color .14s ease,
+      color .14s ease,
+      box-shadow .14s ease,
+      transform .22s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .evidence__shot-badge-icon { display: block; }
+  .evidence__shot-badge-count {
+    font-family: var(--font-display);
+    font-size: 0.6rem;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    transform: translateY(-0.5px);
+  }
+  .evidence--cell > .evidence__trigger:hover .evidence__shot-badge,
+  .evidence--cell > .evidence__trigger:focus-visible .evidence__shot-badge,
+  .evidence--cell[open] .evidence__shot-badge {
+    background: oklch(0.96 0.05 85);
+    color: oklch(0.26 0.06 40);
+    box-shadow:
+      inset 0 0 0 1px oklch(0.48 0.07 50 / 0.65),
+      0 2px 0 oklch(0 0 0 / 0.28);
+  }
+  .evidence--cell > .evidence__trigger:hover .evidence__shot-badge {
+    transform: translateY(-1px) rotate(-2deg);
+  }
 
   /* ---------- Centered modal: backdrop ---------- */
   .evidence__backdrop { display: none; }
