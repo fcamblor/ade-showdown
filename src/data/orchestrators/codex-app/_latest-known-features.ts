@@ -81,23 +81,6 @@ export const LATEST_KNOWN_FEATURES: FeatureSupport[] = [
     sourceExtract: 'Review the agent’s changes in the thread and comment on the diff.',
   },
   {
-    featureId: 'oss',
-    support: 'no',
-    note: 'Codex CLI is Apache-2.0 open source, but the Codex App (and IDE extension / Codex web) are explicitly proprietary.',
-    screenshots: [],
-    sourceUrl: 'https://developers.openai.com/codex/open-source',
-    sourceExtract: 'IDE extension and Codex web: Not open source.',
-  },
-  {
-    featureId: 'free-tier',
-    support: 'no',
-    note: 'Requires a paid ChatGPT subscription (Plus, Pro, Business, Enterprise or Edu) — no standalone free plan.',
-    screenshots: [],
-    sourceUrl: 'https://developers.openai.com/codex/changelog',
-    sourceExtract:
-      'Anyone with a ChatGPT Plus, Pro, Business, Enterprise or Edu subscription can use Codex across the CLI, web, IDE-extension and app with their ChatGPT login.',
-  },
-  {
     featureId: 'self-hosted',
     support: 'no',
     note: 'App runs locally, but model inference is always served by OpenAI; no self-hosted backend.',

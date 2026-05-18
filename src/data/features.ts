@@ -59,18 +59,6 @@ const features: Feature[] = [
     shortDescription: 'In-app UI to review an agent diff before merging.',
   },
   {
-    id: 'oss',
-    label: 'Open source',
-    category: 'pricing',
-    shortDescription: 'Source available under a permissive license.',
-  },
-  {
-    id: 'free-tier',
-    label: 'Free tier',
-    category: 'pricing',
-    shortDescription: 'Free plan usable without a credit card.',
-  },
-  {
     id: 'self-hosted',
     label: 'Self-hosted',
     category: 'platform',

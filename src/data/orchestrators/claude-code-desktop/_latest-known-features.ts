@@ -78,23 +78,6 @@ export const LATEST_KNOWN_FEATURES: FeatureSupport[] = [
       'After Claude makes changes to your code, the diff view lets you review modifications file by file before creating a pull request.',
   },
   {
-    featureId: 'oss',
-    support: 'no',
-    note: 'Source repository is published under a proprietary commercial license.',
-    screenshots: [],
-    sourceUrl: 'https://github.com/anthropics/claude-code/blob/main/LICENSE.md',
-    sourceExtract: "© Anthropic PBC. All rights reserved. Use is subject to Anthropic's Commercial Terms of Service.",
-  },
-  {
-    featureId: 'free-tier',
-    support: 'no',
-    note: 'Requires a paid Claude subscription (Pro, Max, Team, Enterprise) or Console API credits.',
-    screenshots: [],
-    sourceUrl: 'https://code.claude.com/docs/en/quickstart',
-    sourceExtract:
-      'A Claude subscription (Pro, Max, Team, or Enterprise), Claude Console account, or access through a supported cloud provider.',
-  },
-  {
     featureId: 'self-hosted',
     support: 'no',
     note: 'CLI/desktop run locally but model inference is always served by Anthropic (or Bedrock/Vertex/Foundry); no self-hosted backend.',

@@ -11,6 +11,7 @@ export const META: OrchestratorMeta = {
     sourceExtract:
       'Hobby — Free. No credit card required. Individual — $20 / mo. Teams — $40 / user / mo. Enterprise — Custom.',
   },
+  codebase: 'proprietary',
   platforms: ['macos', 'windows', 'linux'],
   platformSources: {
     macos: {

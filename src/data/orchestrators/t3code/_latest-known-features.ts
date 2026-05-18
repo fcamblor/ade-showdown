@@ -72,21 +72,6 @@ export const LATEST_KNOWN_FEATURES: FeatureSupport[] = [
     sourceExtract: 'Inline diff review before you push.',
   },
   {
-    featureId: 'oss',
-    support: 'yes',
-    screenshots: [],
-    sourceUrl: 'https://github.com/pingdotgg/t3code/blob/main/LICENSE',
-    sourceExtract: 'MIT License · commercial-friendly.',
-  },
-  {
-    featureId: 'free-tier',
-    support: 'yes',
-    screenshots: [],
-    sourceUrl: 'https://t3.codes/',
-    sourceExtract:
-      'T3 Code is free, open source and fast. Install it, plug in the harness you already pay for, and let your agents get to work.',
-  },
-  {
     featureId: 'self-hosted',
     support: 'yes',
     note: 'Headless server (`t3 serve`) for SSH/remote machines; LAN, Tailscale and HTTPS endpoints supported.',

@@ -11,6 +11,7 @@ export const META: OrchestratorMeta = {
     sourceExtract:
       "At some point we plan to charge for collaboration features that help teams make the most of AI agents, but for now we're focused on making Conductor an amazing free tool.",
   },
+  codebase: 'proprietary',
   platforms: ['macos'],
   platformSources: {
     macos: {

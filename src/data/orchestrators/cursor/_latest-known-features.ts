@@ -70,20 +70,6 @@ export const LATEST_KNOWN_FEATURES: FeatureSupport[] = [
     sourceExtract: 'The new diffs view allows you to edit and review changes faster with a simpler UI.',
   },
   {
-    featureId: 'oss',
-    support: 'no',
-    note: 'Proprietary; no public source repository.',
-    screenshots: [],
-  },
-  {
-    featureId: 'free-tier',
-    support: 'yes',
-    screenshots: [],
-    sourceUrl: 'https://cursor.com/pricing',
-    sourceExtract:
-      'Hobby (Free) — No credit card required — Limited Agent requests — Limited Tab completions.',
-  },
-  {
     featureId: 'self-hosted',
     support: 'partial',
     note: 'Self-hosted cloud agents only on Enterprise plan, on Kubernetes 1.24+. The Cursor IDE itself is not self-hostable.',

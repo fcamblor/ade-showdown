@@ -66,21 +66,6 @@ export const LATEST_KNOWN_FEATURES: FeatureSupport[] = [
       'The changes panel lets you review all code modifications in your workspace and provide feedback to agents.',
   },
   {
-    featureId: 'oss',
-    support: 'yes',
-    screenshots: [],
-    sourceUrl: 'https://github.com/BloopAI/vibe-kanban',
-    sourceExtract: 'Apache-2.0 license.',
-  },
-  {
-    featureId: 'free-tier',
-    support: 'yes',
-    screenshots: [],
-    sourceUrl: 'https://vibekanban.com/docs/getting-started',
-    sourceExtract:
-      'The application supports local use and allows you to begin without signing in. Launch with: npx vibe-kanban.',
-  },
-  {
     featureId: 'self-hosted',
     support: 'yes',
     screenshots: [],

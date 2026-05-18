@@ -10,6 +10,11 @@ export const META: OrchestratorMeta = {
     sourceUrl: 'https://github.com/docker/cagent',
     sourceExtract: 'Apache-2.0 license.',
   },
+  codebase: 'open-source',
+  codebaseSource: {
+    sourceUrl: 'https://github.com/docker/cagent',
+    sourceExtract: 'Apache-2.0 license.',
+  },
   platforms: ['macos', 'windows', 'linux'],
   platformSources: {
     macos: {

@@ -105,6 +105,12 @@ export const OrchestratorVersionSchema = z.object({
   vendor: z.string().optional(),
   pricing: z.enum(['free', 'freemium', 'paid', 'oss']).optional(),
   pricingSource: MetaSourceSchema.optional(),
+  /** Whether the source code is publicly available, surfaced in the header
+   *  as a pill next to the pricing one. Kept independent from `pricing` so
+   *  that e.g. an open-source codebase can still ship as a paid SaaS, or a
+   *  free tool can stay proprietary. */
+  codebase: z.enum(['open-source', 'proprietary']).optional(),
+  codebaseSource: MetaSourceSchema.optional(),
   platforms: z.array(PlatformSchema).min(1),
   platformSources: z.record(PlatformSchema, MetaSourceSchema),
   /** Strong restriction on the underlying model/agent the ADE can drive — only
