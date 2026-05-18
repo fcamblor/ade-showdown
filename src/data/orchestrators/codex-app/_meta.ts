@@ -11,6 +11,11 @@ export const META: OrchestratorMeta = {
     sourceExtract:
       'Anyone with a ChatGPT Plus, Pro, Business, Enterprise or Edu subscription can use Codex across the CLI, web, IDE-extension and app with their ChatGPT login.',
   },
+  codebase: 'proprietary',
+  codebaseSource: {
+    sourceUrl: 'https://developers.openai.com/codex/open-source',
+    sourceExtract: 'IDE extension and Codex web: Not open source.',
+  },
   modelRestriction: {
     message: 'OpenAI models only. ChatGPT login required.',
     sourceUrl: 'https://developers.openai.com/codex/changelog',

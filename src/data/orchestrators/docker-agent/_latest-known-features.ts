@@ -72,22 +72,6 @@ export const LATEST_KNOWN_FEATURES: FeatureSupport[] = [
     screenshots: [],
   },
   {
-    featureId: 'oss',
-    support: 'yes',
-    screenshots: [],
-    sourceUrl: 'https://github.com/docker/cagent',
-    sourceExtract: 'Apache-2.0 license.',
-  },
-  {
-    featureId: 'free-tier',
-    support: 'yes',
-    note: 'The runtime itself is free; users supply their own model-provider API keys.',
-    screenshots: [],
-    sourceUrl: 'https://github.com/docker/cagent',
-    sourceExtract:
-      'Build, run, and share AI agents with a declarative YAML config, rich tool ecosystem, and multi-agent orchestration.',
-  },
-  {
     featureId: 'self-hosted',
     support: 'yes',
     note: 'Runs as a local CLI; an HTTP API server mode (`cagent api`) can be hosted on any machine.',

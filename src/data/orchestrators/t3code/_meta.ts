@@ -10,6 +10,11 @@ export const META: OrchestratorMeta = {
     sourceUrl: 'https://t3.codes/',
     sourceExtract: 'MIT License · commercial-friendly. No telemetry — Unless you opt in. Full stop.',
   },
+  codebase: 'open-source',
+  codebaseSource: {
+    sourceUrl: 'https://github.com/pingdotgg/t3code/blob/main/LICENSE',
+    sourceExtract: 'MIT License · commercial-friendly.',
+  },
   platforms: ['macos', 'windows', 'linux', 'web'],
   platformSources: {
     macos: {

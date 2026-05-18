@@ -15,6 +15,12 @@ export const META: OrchestratorMeta = {
     sourceExtract:
       'A Claude subscription (Pro, Max, Team, or Enterprise), Claude Console account, or access through a supported cloud provider.',
   },
+  codebase: 'proprietary',
+  codebaseSource: {
+    sourceUrl: 'https://github.com/anthropics/claude-code/blob/main/LICENSE.md',
+    sourceExtract:
+      "© Anthropic PBC. All rights reserved. Use is subject to Anthropic's Commercial Terms of Service.",
+  },
   platforms: ['macos', 'windows'],
   platformSources: {
     macos: {

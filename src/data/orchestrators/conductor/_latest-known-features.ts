@@ -141,19 +141,6 @@ export const LATEST_KNOWN_FEATURES: FeatureSupport[] = [
     sourceExtract: 'The Diff Viewer shows the code changes in a workspace.',
   },
   {
-    featureId: 'oss',
-    support: 'no',
-    note: 'Closed-source proprietary Mac app; no OSS license documented.',
-    screenshots: [],
-  },
-  {
-    featureId: 'free-tier',
-    support: 'yes',
-    screenshots: [],
-    sourceUrl: 'https://www.conductor.build/docs/faq',
-    sourceExtract: "We're focused on making Conductor an amazing free tool.",
-  },
-  {
     featureId: 'self-hosted',
     support: 'no',
     note: 'Closed-source Mac app; Conductor Cloud is hosted by the vendor.',
