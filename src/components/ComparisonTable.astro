@@ -357,11 +357,11 @@ const featureCount = visibleFeatures.length;
                       </>
                     ) : versionTooltip ? (
                       <span class="tool__version tool__version--has-tooltip" title={versionTooltip}>
-                        v{o.version}{isDefaultVisible(o) ? ' · latest' : ''}
+                        v{o.version}{isDefaultVisible(o) ? ' · latest' : ''}{!isApproved(o) ? ' · preview' : ''}
                       </span>
                     ) : (
                       <span class="tool__version">
-                        v{o.version}{isDefaultVisible(o) ? ' · latest' : ''}
+                        v{o.version}{isDefaultVisible(o) ? ' · latest' : ''}{!isApproved(o) ? ' · preview' : ''}
                       </span>
                     )}
                     {o.releaseDate ? (
