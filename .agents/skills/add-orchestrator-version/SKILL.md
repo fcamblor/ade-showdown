@@ -1,15 +1,11 @@
 ---
 name: add-orchestrator-version
-description: Add a new orchestrator version (or bootstrap a brand-new orchestrator) to the ADE Showdown dataset. Asks the user for the orchestrator name and latest known version, bootstraps the directory + `_meta.ts` + `_latest-known-features.ts` when the orchestrator is unknown, then creates the version file and dispatches research agents on the tracked sources to fill the feature matrix. Triggers: "add a new version", "new orchestrator version", "bump <tool> to <version>", "enrich showdown", "refresh feature matrix".
+description: Bootstrap a brand-new orchestrator or add a new version to an existing one in the ADE Showdown dataset. Asks the user for the orchestrator name and latest known version, infers the meta block from public sources when new, creates the version file, then hands off to `review-orchestrator-version` to walk the feature matrix interactively. Triggers: "add a new version", "new orchestrator version", "bump <tool> to <version>", "enrich showdown".
 ---
 
 # Skill — `add-orchestrator-version`
 
-Goal: enrich the ADE Showdown dataset with a new orchestrator version. The skill is **interactive** — never invent data; always ask the user when something is unknown.
-
-## Optional argument
-
-`--full-recheck` (or `recheck=true` in args) — when set, re-runs research on **every** feature, even ones already covered. Default: only research features whose `support` is `unknown` or missing for that orchestrator.
+Goal: register a new orchestrator+version in the dataset and seed enough structure for `review-orchestrator-version` to take over and fill the feature matrix interactively. The skill is **strictly bootstrap-only** — it does **not** research feature support itself; that responsibility belongs to `review-orchestrator-version`.
 
 ---
 
@@ -85,12 +81,15 @@ Create three files under `src/data/orchestrators/<toolId>/`:
 
 - `_meta.ts` — implements `OrchestratorMeta` (see `src/data/version-diff.ts`). Mandatory fields: `toolId`, `toolName`, `homepage`, `platforms`, `platformSources`. Optional but recommended: `vendor`, `pricing`, `pricingSource`, `modelRestriction`, `trackingSources`. Follow the existing examples (`src/data/orchestrators/cursor/_meta.ts`, `src/data/orchestrators/conductor/_meta.ts`).
 
-- `_latest-known-features.ts` — **must export an empty array** at bootstrap:
+- `_latest-known-features.ts` — seed with **one `unknown` entry per feature** in `src/data/features.ts`, in the canonical order. This gives `review-orchestrator-version` the full to-do list to walk through:
   ```ts
   import type { FeatureSupport } from '../../schema';
 
-  // Preview stub — feature matrix not yet populated.
-  export const LATEST_KNOWN_FEATURES: FeatureSupport[] = [];
+  export const LATEST_KNOWN_FEATURES: FeatureSupport[] = [
+    { featureId: 'git-worktrees',     support: 'unknown', screenshots: [] },
+    { featureId: 'sandbox-isolation', support: 'unknown', screenshots: [] },
+    // …one per feature in FEATURES, same order…
+  ];
   ```
 
 - Skip creating the version file at this stage — Step 3 does it.
@@ -124,73 +123,23 @@ export default OrchestratorVersionSchema.parse(data);
 
 ---
 
-## Step 4 — Research feature support
+## Step 4 — Hand off to `review-orchestrator-version`
 
-Goal: populate `_latest-known-features.ts` with one `FeatureSupport` entry per `FEATURES` in `src/data/features.ts`.
+This skill does **not** research feature support. Instead, it delegates to the dedicated review skill, which walks every uncovered feature with the user, dispatching a fresh research agent per feature and persisting only what the user confirms.
 
-### 4a. Determine the scope
+Briefly summarise to the user what was just bootstrapped (toolId, version, whether the orchestrator was newly created, count of `unknown` feature rows seeded), then invoke:
 
-Load the current contents of `<toolId>/_latest-known-features.ts`. For each feature in `src/data/features.ts`:
-
-- If `--full-recheck` → **research it**.
-- Else if no entry exists for that `featureId` → **research it**.
-- Else if `support === 'unknown'` → **research it**.
-- Else if `support === 'partial'` AND the entry lacks `sourceUrl`+`sourceExtract` → **research it** (coverage is partial).
-- Otherwise → **skip**, keep the existing entry verbatim.
-
-### 4b. Dispatch research agents (parallel)
-
-Group the to-research features into a handful of batches (max ~6–8 features per agent to keep prompts focused). For each batch, launch one `Explore` or `general-purpose` agent **in parallel** (single message, multiple `Agent` tool calls) with:
-
-- The list of features to investigate (id + label + shortDescription + longDescription).
-- The orchestrator's `trackingSources` URLs from `_meta.ts`.
-- The `FeatureSupport` schema contract (`featureId`, `support: yes|partial|no|unknown`, optional `note ≤ 280 chars`, optional `sourceUrl`, optional `sourceExtract`).
-- Explicit instructions:
-  - Use `WebFetch` / `WebSearch` against the provided tracking sources.
-  - For each feature, return a strict JSON object matching `FeatureSupport`.
-  - When evidence is missing or ambiguous, return `support: 'unknown'` rather than guessing.
-  - When `support` is `yes` or `partial`, **require** a `sourceUrl` + `sourceExtract` quote.
-  - `note` is optional and capped at 280 chars; use it for caveats only.
-  - Do not write files; just return the JSON.
-
-### 4c. Merge results
-
-Collect the JSON returned by each agent and assemble the final `FeatureSupport[]` array, preserving the feature ordering used by existing orchestrators (the order in `src/data/features.ts`). Write it to `_latest-known-features.ts`:
-
-```ts
-import type { FeatureSupport } from '../../schema';
-
-export const LATEST_KNOWN_FEATURES: FeatureSupport[] = [
-  // …entries…
-];
+```
+Skill(skill: "review-orchestrator-version", args: "<toolId>@<version> --only-unreviewed")
 ```
 
-For features that remained `unknown` after research, still include the entry with `support: 'unknown'` — do not omit them.
+The review skill takes over and:
 
----
+- Skips its own selection step (the `<toolId>@<version>` argument is pre-filled).
+- Walks only features whose `support` is `unknown` or missing — for a fresh bootstrap that's the entire matrix; for a known orchestrator with a new version, only the rows still flagged unknown.
+- Validates (`pnpm exec tsc --noEmit`) and commits at the end via `/commit`.
 
-## Step 5 — Validate
-
-Run validation before reporting completion:
-
-```sh
-pnpm exec tsc --noEmit
-```
-
-(If a `pnpm validate` or `pnpm check` script exists, prefer that.)
-
-The Zod schemas (`OrchestratorVersionSchema`) will fail loudly on schema violations — fix any issues reported.
-
----
-
-## Step 6 — Report
-
-Summarise to the user:
-- Whether the orchestrator was newly bootstrapped or pre-existing.
-- The created/updated files.
-- A short feature-coverage breakdown: counts of `yes` / `partial` / `no` / `unknown`.
-- The preview URL hint: `?preview=<toolId>@<version>`.
-- Any features that stayed `unknown` so the user can fill them in manually.
+Stop the `add` skill **immediately** after the handoff message — do **not** run `tsc`, do **not** create a commit, do **not** print a coverage summary. All of that is the review skill's responsibility.
 
 ---
 
