@@ -13,20 +13,20 @@ export const LATEST_KNOWN_FEATURES: FeatureSupport[] = [
   {
     featureId: 'git-worktrees',
     support: 'yes',
-    note: 'Background sessions and `claude --worktree` create per-session worktrees under `.claude/worktrees/`.',
+    note: 'Every session in the Code tab automatically runs in its own git worktree under `.claude/worktrees/`; location and branch prefix are configurable in Settings → Claude Code.',
     screenshots: [],
-    sourceUrl: 'https://code.claude.com/docs/en/worktrees',
+    sourceUrl: 'https://code.claude.com/docs/en/desktop',
     sourceExtract:
-      'Pass `--worktree` or `-w` to create an isolated worktree and start Claude in it. By default, the worktree is created under `.claude/worktrees/<value>/` at your repository root, on a new branch named `worktree-<value>`.',
+      'For Git repositories, each session gets its own isolated copy of your project using Git worktrees, so changes in one session don’t affect other sessions until you commit them. Worktrees are stored in `<project-root>/.claude/worktrees/` by default.',
   },
   {
     featureId: 'cloud-execution',
-    support: 'partial',
-    note: 'Code tab runs locally; Claude Code on the web (claude.ai/code) and Cowork/Dispatch run on Anthropic-managed cloud, reachable from the desktop app.',
+    support: 'yes',
+    note: 'Environment selector in the prompt area exposes a Remote option that runs the session on Anthropic-hosted cloud; sessions continue even after closing the app. SSH sessions are an additional remote option.',
     screenshots: [],
-    sourceUrl: 'https://code.claude.com/docs/en/claude-code-on-the-web',
+    sourceUrl: 'https://code.claude.com/docs/en/desktop',
     sourceExtract:
-      'Claude Code on the web runs tasks on Anthropic-managed cloud infrastructure at claude.ai/code. Sessions persist even if you close your browser, and you can monitor them from the Claude mobile app.',
+      'Environment: choose where Claude runs. Select Local for your machine, Remote for Anthropic-hosted cloud sessions, or an SSH connection for a remote machine you manage. […] Remote sessions run on Anthropic\'s cloud infrastructure and continue even if you close the app or shut down your computer.',
   },
   {
     featureId: 'local-execution',
@@ -48,25 +48,29 @@ export const LATEST_KNOWN_FEATURES: FeatureSupport[] = [
   {
     featureId: 'pr-creation',
     support: 'yes',
-    note: 'Built-in git integration creates branches, commits and opens pull requests.',
+    note: 'Desktop creates the PR via the GitHub CLI (`gh`) and then surfaces a dedicated CI status bar inside the session with Auto-fix and Auto-merge toggles.',
     screenshots: [],
-    sourceUrl: 'https://code.claude.com/docs/en/overview',
+    sourceUrl: 'https://code.claude.com/docs/en/desktop',
     sourceExtract:
-      'Claude Code works directly with git. It stages changes, writes commit messages, creates branches, and opens pull requests.',
+      'After you open a pull request, a CI status bar appears in the session. Claude Code uses the GitHub CLI to poll check results and surface failures. […] PR monitoring requires the GitHub CLI (`gh`) to be installed and authenticated on your machine.',
   },
   {
     featureId: 'visual-task-management',
     support: 'no',
-    note: 'Agent view groups sessions by state (Needs input / Working / Completed) as a terminal list, not as a board-style visual surface.',
+    note: 'Sidebar lists sessions and supports filtering by status / project / environment plus grouping by project, but it stays a vertical list — no kanban-style board surface in the Code tab.',
     screenshots: [],
+    sourceUrl: 'https://code.claude.com/docs/en/desktop',
+    sourceExtract:
+      'Use the controls at the top of the sidebar to filter sessions by status, project, or environment, and to group sessions by project.',
   },
   {
     featureId: 'live-logs',
     support: 'yes',
-    note: '`claude logs <id>` and the agent-view peek panel show session output in real time.',
+    note: 'Each session streams tool calls, file edits and intermediate steps live in the chat transcript; a Verbose view mode exposes every step.',
     screenshots: [],
-    sourceUrl: 'https://code.claude.com/docs/en/agent-view',
-    sourceExtract: "`claude logs <id>` — Print the session's recent output.",
+    sourceUrl: 'https://code.claude.com/docs/en/desktop',
+    sourceExtract:
+      'View modes control how much detail appears in the chat transcript. […] Verbose — Every tool call, file read, and intermediate step Claude takes.',
   },
   {
     featureId: 'diff-viewer',
@@ -79,15 +83,18 @@ export const LATEST_KNOWN_FEATURES: FeatureSupport[] = [
   },
   {
     featureId: 'diff-whitespace-toggle',
-    support: 'unknown',
+    support: 'no',
     note: 'No ignore-whitespace toggle documented in the desktop diff viewer.',
     screenshots: [],
   },
   {
     featureId: 'diff-multi-views',
-    support: 'unknown',
-    note: 'Diff viewer renders the current pending changes; no documented selector to switch between per-commit / per-turn / branch-vs-target scopes.',
+    support: 'no',
+    note: 'Desktop diff viewer renders the current pending changes file by file before the PR is opened; no documented selector to switch between per-commit / per-turn / branch-vs-target scopes.',
     screenshots: [],
+    sourceUrl: 'https://code.claude.com/docs/en/desktop',
+    sourceExtract:
+      'After Claude makes changes to your code, the diff view lets you review modifications file by file before creating a pull request.',
   },
   {
     featureId: 'self-hosted',
@@ -97,35 +104,35 @@ export const LATEST_KNOWN_FEATURES: FeatureSupport[] = [
   },
   {
     featureId: 'sound-notifications',
-    support: 'partial',
-    note: 'OS notification fires on session completion; a `Notification` hook event is exposed, but no dedicated sound-effects configuration is documented.',
+    support: 'no',
+    note: 'Desktop fires a system OS notification when a session finishes and the user isn’t viewing it, but exposes no configurable sound-effect picker. The `Notification` hook event can be wired to a shell hook to play a sound, but that is not a first-class setting.',
     screenshots: [],
-    sourceUrl: 'https://code.claude.com/docs/en/hooks',
+    sourceUrl: 'https://code.claude.com/docs/en/desktop',
     sourceExtract:
-      "Hooks are user-defined shell commands, HTTP endpoints, or LLM prompts that execute automatically at specific points in Claude Code's lifecycle.",
+      'The desktop app sends an OS notification when a Code session finishes a task and you aren\'t currently viewing that session.',
   },
   {
     featureId: 'multi-sessions-per-worktree',
     support: 'no',
-    note: 'Each background session gets its own isolated worktree; multiple parallel sessions cannot share one worktree.',
+    note: 'Every new session in the sidebar gets its own isolated worktree; sessions cannot be attached to the same worktree. The side-chat surface (Cmd+;) is a single ephemeral aside that reads the main thread but does not write back.',
     screenshots: [],
-    sourceUrl: 'https://code.claude.com/docs/en/agent-view',
+    sourceUrl: 'https://code.claude.com/docs/en/desktop',
     sourceExtract:
-      'Before editing files, Claude moves the session into an isolated git worktree under `.claude/worktrees/`, so parallel sessions can read the same checkout but each writes to its own.',
+      'For Git repositories, each session gets its own isolated copy of your project using Git worktrees, so changes in one session don’t affect other sessions until you commit them.',
   },
   {
     featureId: 'no-worktree-mode',
-    support: 'yes',
-    note: 'Default `claude` invocation runs directly in the current directory; worktrees are opt-in via `--worktree` or background dispatch.',
+    support: 'no',
+    note: 'For Git repositories the Code tab always allocates a per-session worktree under `.claude/worktrees/`; there is no Desktop switch to run a session directly against the original checkout.',
     screenshots: [],
-    sourceUrl: 'https://code.claude.com/docs/en/quickstart',
+    sourceUrl: 'https://code.claude.com/docs/en/desktop',
     sourceExtract:
-      'Open your terminal in any project directory and start Claude Code: `cd /path/to/your/project` `claude`.',
+      'For Git repositories, each session gets its own isolated copy of your project using Git worktrees, so changes in one session don’t affect other sessions until you commit them.',
   },
   {
     featureId: 'workflow-shell-hooks',
     support: 'yes',
-    note: 'Lifecycle hook events including SessionStart/SessionEnd, PreToolUse, PostToolUse, WorktreeCreate, WorktreeRemove, Stop.',
+    note: 'Hooks declared in `~/.claude/settings.json` or `.claude/settings.json` apply to Desktop sessions and include lifecycle events such as SessionStart/SessionEnd, PreToolUse, PostToolUse, WorktreeCreate, WorktreeRemove, Stop and Notification.',
     screenshots: [],
     sourceUrl: 'https://code.claude.com/docs/en/hooks',
     sourceExtract:
@@ -169,7 +176,8 @@ export const LATEST_KNOWN_FEATURES: FeatureSupport[] = [
   },
   {
     featureId: 'github-comment-sync',
-    support: 'unknown',
+    support: 'no',
+    note: 'The CI status bar in Desktop tracks check results but no documented ingestion of GitHub PR review comments into the in-app diff viewer.',
     screenshots: [],
   },
   {
@@ -183,12 +191,12 @@ export const LATEST_KNOWN_FEATURES: FeatureSupport[] = [
   },
   {
     featureId: 'open-in-ide',
-    support: 'yes',
-    note: 'Right-click context menu opens files in VS Code, Cursor, Zed or other installed editors.',
+    support: 'partial',
+    note: 'Right-click "Open in" on a file path and the "Continue in" menu on the toolbar both open a fixed list of installed editors (VS Code, Cursor, Zed…); no user-defined custom external apps.',
     screenshots: [],
     sourceUrl: 'https://code.claude.com/docs/en/desktop',
     sourceExtract:
-      'Right-click any file path in the chat, diff viewer, or file pane to open a context menu: […] Open in: open the file in an installed editor such as VS Code, Cursor, or Zed.',
+      'Right-click any file path in the chat, diff viewer, or file pane to open a context menu: […] Open in: open the file in an installed editor such as VS Code, Cursor, or Zed. […] The Continue in menu […] lets you move your session to another surface: […] Your IDE: opens your project in a supported IDE at the current working directory.',
   },
   {
     featureId: 'file-tree-browser',
@@ -210,20 +218,20 @@ export const LATEST_KNOWN_FEATURES: FeatureSupport[] = [
   {
     featureId: 'custom-ui-actions',
     support: 'yes',
-    note: 'Skills and slash commands are user-defined; skills can run shell commands and accept arguments.',
+    note: 'User-authored skills (and legacy `.claude/commands/*.md` slash commands) are surfaced via the `+` button and slash-command palette in the prompt box, giving multiple custom LLM-prompt and shell-command actions inside the Desktop UI.',
     screenshots: [],
-    sourceUrl: 'https://code.claude.com/docs/en/slash-commands',
+    sourceUrl: 'https://code.claude.com/docs/en/desktop',
     sourceExtract:
-      'Custom commands have been merged into skills. A file at `.claude/commands/deploy.md` and a skill at `.claude/skills/deploy/SKILL.md` both create `/deploy` and work the same way.',
+      'Skills extend what Claude can do. Claude loads them automatically when relevant, or you can invoke one directly: type `/` in the prompt box or click the `+` button and select Slash commands to browse what\'s available. This includes built-in commands, your custom skills, project skills from your codebase, and skills from any installed plugins.',
   },
   {
     featureId: 'session-handoff',
-    support: 'yes',
-    note: '`claude --resume`, `--teleport`, `/desktop`, and CLAUDE.md let sessions persist context and move between surfaces (terminal, web, desktop, mobile).',
+    support: 'partial',
+    note: 'CLAUDE.md / `.claude/rules/*.md` persist project-wide instructions across sessions and Plan mode surfaces a plan inline, but Desktop ships no gitignored handoff directory (no `.context`-style folder) where sessions would drop plans or notes for the next.',
     screenshots: [],
-    sourceUrl: 'https://code.claude.com/docs/en/overview',
+    sourceUrl: 'https://code.claude.com/docs/en/desktop',
     sourceExtract:
-      "Sessions aren't tied to a single surface. Move work between environments as your context changes: Kick off a long-running task on the web or iOS app, then pull it into your terminal with `claude --teleport`. Hand off a terminal session to the Desktop app with `/desktop` for visual diff review.",
+      'Plan mode — Claude reads files and runs commands to explore, then proposes a plan without editing your source code. Good for complex tasks where you want to review the approach first.',
   },
   {
     featureId: 'remote-file-sharing',
@@ -269,20 +277,19 @@ export const LATEST_KNOWN_FEATURES: FeatureSupport[] = [
   {
     featureId: 'switch-model-mid-session',
     support: 'yes',
-    note: '`/model <alias|name>` switches model mid-session; selection persists to user settings.',
+    note: 'Model dropdown next to the send button (Cmd+Shift+I) swaps the Anthropic model mid-session; the selection persists.',
     screenshots: [],
-    sourceUrl: 'https://code.claude.com/docs/en/model-config',
+    sourceUrl: 'https://code.claude.com/docs/en/desktop',
     sourceExtract:
-      'During session — Use `/model <alias|name>` to switch immediately, or run `/model` with no argument to open the picker. Your `/model` selection is saved to user settings and persists across restarts.',
+      'Model: pick a model from the dropdown next to the send button. You can change this during the session.',
   },
   {
     featureId: 'model-effort-support',
     support: 'yes',
-    note: 'Adaptive reasoning effort levels `low`, `medium`, `high`, `xhigh`, `max` plus extended thinking.',
+    note: 'Effort menu reachable via Cmd+Shift+E lets the user pick adaptive reasoning levels (`low`, `medium`, `high`, `xhigh`, `max`).',
     screenshots: [],
-    sourceUrl: 'https://code.claude.com/docs/en/model-config',
-    sourceExtract:
-      'Effort levels control adaptive reasoning, which lets the model decide whether and how much to think on each step based on task complexity. Opus 4.7: `low`, `medium`, `high`, `xhigh`, `max`.',
+    sourceUrl: 'https://code.claude.com/docs/en/desktop',
+    sourceExtract: 'Cmd Shift E — Open effort menu',
   },
   {
     featureId: 'web-preview',
@@ -304,21 +311,21 @@ export const LATEST_KNOWN_FEATURES: FeatureSupport[] = [
   },
   {
     featureId: 'quick-chat',
-    support: 'partial',
-    note: 'Desktop app has a separate Chat tab for repo-less conversations; the Code tab still requires a project folder. `claude -p "query"` runs one-off CLI queries from any cwd.',
+    support: 'yes',
+    note: 'The Desktop app ships two repo-less tabs alongside Code: Chat (standard Claude conversations) and Cowork (Dispatch-style agentic work), both detached from any worktree.',
     screenshots: [],
-    sourceUrl: 'https://code.claude.com/docs/en/quickstart',
+    sourceUrl: 'https://code.claude.com/docs/en/desktop',
     sourceExtract:
-      '`claude -p "query"` — Run one-off query, then exit — `claude -p "explain this function"`.',
+      'The Claude Desktop app has three tabs: Chat for conversations, Cowork for Dispatch and longer agentic work, and Code for software development.',
   },
   {
     featureId: 'mission-control',
-    support: 'partial',
-    note: 'Agent view (`claude agents`) aggregates background sessions across projects with their current state. Live-oriented; no dedicated historical/audit timeline of past activity.',
+    support: 'no',
+    note: 'Sidebar in the Code tab aggregates live sessions across projects (filter/group controls included), but it focuses on what is currently in flight; no dedicated historical/audit timeline of past or archived activity.',
     screenshots: [],
-    sourceUrl: 'https://code.claude.com/docs/en/agent-view',
+    sourceUrl: 'https://code.claude.com/docs/en/desktop',
     sourceExtract:
-      "The list shows every background session you've started, across all your projects. A session working in one repository and another in a different worktree both appear here, regardless of which directory you opened agent view from.",
+      'Use the controls at the top of the sidebar to filter sessions by status, project, or environment, and to group sessions by project.',
   },
   {
     featureId: 'copy-from-origin-workspace',
@@ -373,14 +380,17 @@ export const LATEST_KNOWN_FEATURES: FeatureSupport[] = [
   },
   {
     featureId: 'fork-workspace',
-    support: 'unknown',
-    note: '`claude --resume` and `--teleport` move sessions between surfaces, but no documented action clones an entire session + worktree state into a brand-new worktree.',
+    support: 'no',
+    note: 'The "Continue in" menu can hand a session off to the web or an IDE, but the Code tab exposes no one-click action that clones an existing session + worktree state into a brand-new worktree. (`--fork-session` exists in the CLI only.)',
     screenshots: [],
+    sourceUrl: 'https://code.claude.com/docs/en/desktop',
+    sourceExtract:
+      'The Continue in menu, accessible from the VS Code icon in the bottom right of the session toolbar, lets you move your session to another surface.',
   },
   {
     featureId: 'chat-user-questions',
-    support: 'unknown',
-    note: 'Agent SDK exposes user-question tools, but no documented inline rendering inside the desktop chat surface specifically.',
+    support: 'no',
+    note: 'No documented inline rendering of `AskUserQuestion`-style tool calls in the Desktop chat surface; the answer surface remains free-form text.',
     screenshots: [],
   },
 ];

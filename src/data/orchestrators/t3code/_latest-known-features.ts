@@ -82,9 +82,13 @@ export const LATEST_KNOWN_FEATURES: FeatureSupport[] = [
   },
   {
     featureId: 'diff-multi-views',
-    support: 'unknown',
-    note: 'Inline diff is the documented surface; no public confirmation of multiple selectable scopes (per-commit / per-turn / branch-vs-target).',
+    support: 'partial',
+    note: 'DiffPanel exposes two scopes: the whole-thread cumulative diff (selectWholeConversation) and a per-turn diff selected via the turn strip; no per-commit or branch-vs-target selectors found.',
     screenshots: [],
+    sourceUrl:
+      'https://github.com/pingdotgg/t3code/blob/main/apps/web/src/components/DiffPanel.tsx',
+    sourceExtract:
+      'const selectTurn = (turnId: TurnId) => { […] return { ...rest, diff: "1", diffTurnId: turnId }; }; const selectWholeConversation = () => { […] return { ...rest, diff: "1" }; };',
   },
   {
     featureId: 'self-hosted',
@@ -194,9 +198,13 @@ export const LATEST_KNOWN_FEATURES: FeatureSupport[] = [
   },
   {
     featureId: 'inline-file-editing',
-    support: 'unknown',
-    note: 'A ProjectWriteFile RPC exists in the contracts but no in-app file editor surface was identified; open-in-IDE is the documented edit path.',
+    support: 'no',
+    note: 'No in-app file editor surface; the only documented client-side use of the `writeFile` RPC is saving a Plan markdown to the workspace root. For actual edits, the user is sent to an external IDE.',
     screenshots: [],
+    sourceUrl:
+      'https://github.com/pingdotgg/t3code/blob/main/apps/web/src/components/PlanSidebar.tsx',
+    sourceExtract:
+      'void api.projects.writeFile({ cwd: workspaceRoot, relativePath: filename, contents: normalizePlanMarkdownForExport(planMarkdown) })',
   },
   {
     featureId: 'custom-ui-actions',
@@ -208,12 +216,13 @@ export const LATEST_KNOWN_FEATURES: FeatureSupport[] = [
   },
   {
     featureId: 'session-handoff',
-    support: 'unknown',
-    note: 'Checkpointing captures workspace state for diff/restore, but no gitignored handoff directory (e.g. .context) is documented.',
+    support: 'partial',
+    note: 'Plan mode produces a proposed plan that the user can save to the workspace root as markdown via PlanSidebar (copy / download / save-to-workspace); no dedicated gitignored handoff directory (e.g. `.context`).',
     screenshots: [],
-    sourceUrl: 'https://github.com/pingdotgg/t3code/blob/main/.docs/encyclopedia.md',
+    sourceUrl:
+      'https://github.com/pingdotgg/t3code/blob/main/apps/web/src/components/PlanSidebar.tsx',
     sourceExtract:
-      'Checkpointing captures workspace state over time so the app can diff turns and restore earlier points.',
+      'const handleSaveToWorkspace = useCallback(() => { […] void api.projects.writeFile({ cwd: workspaceRoot, relativePath: filename, contents: normalizePlanMarkdownForExport(planMarkdown) })',
   },
   {
     featureId: 'remote-file-sharing',
@@ -267,9 +276,13 @@ export const LATEST_KNOWN_FEATURES: FeatureSupport[] = [
   },
   {
     featureId: 'model-effort-support',
-    support: 'unknown',
-    note: 'Per-provider model picker exists, but reasoning-effort exposure was not confirmed for v0.0.24.',
+    support: 'yes',
+    note: 'TraitsPicker surfaces per-provider effort/thinking/fast-mode/context-window controls (with Claude ultrathink prompt prefix support) in the chat composer.',
     screenshots: [],
+    sourceUrl:
+      'https://github.com/pingdotgg/t3code/blob/main/apps/web/src/components/chat/TraitsPicker.tsx',
+    sourceExtract:
+      'applyClaudePromptEffortPrefix, […] const showEffort = selected.primarySelectDescriptor !== null; […] hasAnyControls: showEffort || showThinking || showFastMode || showContextWindow || showAgent.',
   },
   {
     featureId: 'web-preview',
@@ -297,30 +310,36 @@ export const LATEST_KNOWN_FEATURES: FeatureSupport[] = [
   },
   {
     featureId: 'mission-control',
-    support: 'unknown',
-    note: 'Sidebar groups threads per workspace; cross-project dashboard aggregating running/idle/awaiting-input states could not be confirmed from public sources.',
+    support: 'no',
+    note: 'Sidebar groups live threads per workspace; no dedicated dashboard surfacing historical activity (past runs, archived threads) across the whole orchestrator was found in the web app.',
     screenshots: [],
   },
   {
     featureId: 'copy-from-origin-workspace',
-    support: 'unknown',
-    note: 'No documented mechanism to copy .env/local secrets from the origin repo into a new worktree.',
+    support: 'partial',
+    note: 'No first-class glob-based "files to copy" UI, but a project script flagged `runOnWorktreeCreate: true` can use the documented `T3CODE_PROJECT_ROOT` env var to `cp` files (e.g. `.env`) from the origin checkout into the new worktree.',
     screenshots: [],
+    sourceUrl:
+      'https://github.com/pingdotgg/t3code/blob/main/packages/shared/src/projectScripts.ts',
+    sourceExtract: 'T3CODE_PROJECT_ROOT, T3CODE_WORKTREE_PATH.',
   },
   {
     featureId: 'symlink-from-origin-workspace',
-    support: 'unknown',
-    note: 'No symlink-based file-sharing mechanism documented between origin repo and worktree.',
+    support: 'partial',
+    note: 'Same `runOnWorktreeCreate` setup-script pattern with `T3CODE_PROJECT_ROOT` lets the user `ln -sf` files into a new worktree, but no first-class symlink declaration is documented.',
     screenshots: [],
+    sourceUrl:
+      'https://github.com/pingdotgg/t3code/blob/main/packages/shared/src/projectScripts.ts',
+    sourceExtract: 'T3CODE_PROJECT_ROOT, T3CODE_WORKTREE_PATH.',
   },
   {
     featureId: 'chat-rewind',
-    support: 'partial',
-    note: 'Checkpointing captures workspace state per turn so the app can diff turns and restore earlier points (impacts workspace state, not only conversation history).',
+    support: 'yes',
+    note: 'Per-turn "Revert to checkpoint" action (dispatching `thread.checkpoint.revert`) rolls back both newer messages AND turn diffs in the worktree; warns the action cannot be undone.',
     screenshots: [],
-    sourceUrl: 'https://github.com/pingdotgg/t3code/blob/main/.docs/encyclopedia.md',
+    sourceUrl: 'https://github.com/pingdotgg/t3code/blob/main/apps/web/src/components/ChatView.tsx',
     sourceExtract:
-      'Checkpointing captures workspace state over time so the app can diff turns and restore earlier points.',
+      'Revert this thread to checkpoint ${turnCount}? This will discard newer messages and turn diffs in this thread. This action cannot be undone. […] api.orchestration.dispatchCommand({ type: "thread.checkpoint.revert", … }).',
   },
   {
     featureId: 'predefined-workflows-sessions',
@@ -342,14 +361,18 @@ export const LATEST_KNOWN_FEATURES: FeatureSupport[] = [
   },
   {
     featureId: 'fork-workspace',
-    support: 'unknown',
-    note: 'No documented "fork workspace" action duplicating worktree + thread history into a new workspace.',
+    support: 'no',
+    note: 'No "fork workspace" action found in the contracts or web app — neither `forkThread` nor a worktree-cloning command exists, and the keybinding catalog exposes only `chat.new` / `chat.newLocal`.',
     screenshots: [],
   },
   {
     featureId: 'chat-user-questions',
-    support: 'unknown',
-    note: 'No documented inline rendering of agent user-question tools (AskUserQuestion-style) in the T3 Code chat surface.',
+    support: 'yes',
+    note: 'ClaudeAdapter detects `AskUserQuestion` tool calls and emits a `user-input.requested` runtime event; the composer renders a dedicated ComposerPendingUserInputPanel with keyboard-shortcut option selection and multi-select support.',
     screenshots: [],
+    sourceUrl:
+      'https://github.com/pingdotgg/t3code/blob/main/apps/server/src/provider/Layers/ClaudeAdapter.ts',
+    sourceExtract:
+      'if (toolName === "AskUserQuestion") { return yield* handleAskUserQuestion(context, toolInput, callbackOptions); } […] handleAskUserQuestion emits a `user-input.requested` runtime event and waits for the user to respond via `respondToUserInput`.',
   },
 ];
