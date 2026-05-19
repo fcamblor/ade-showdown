@@ -83,7 +83,7 @@ export const LATEST_KNOWN_FEATURES: FeatureSupport[] = [
   },
   {
     featureId: 'visual-task-management',
-    support: 'partial',
+    support: 'yes',
     note: 'Kanban-style Dashboard view available behind an experimental flag (Settings → Experimental → Dashboard). Statuses are hardcoded (Backlog / In progress / In review / Done / Canceled), no customization.',
     screenshots: [
       {
@@ -285,7 +285,7 @@ export const LATEST_KNOWN_FEATURES: FeatureSupport[] = [
   },
   {
     featureId: 'github-comment-sync',
-    support: 'partial',
+    support: 'yes',
     note: 'One-way: GitHub review comments are surfaced in Conductor and resolving them updates the Checks tab.',
     screenshots: [
       {
