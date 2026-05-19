@@ -23,8 +23,7 @@ export const META: OrchestratorMeta = {
   modelIntegrations: [
     {
       vendor: 'OpenAI',
-      kind: 'provider-sdk',
-      notes: 'Direct OpenAI integration via ChatGPT login; CLI sibling can also route through AWS Bedrock for OpenAI models.',
+      kind: 'unknown',
       sourceUrl: 'https://developers.openai.com/codex/changelog',
       sourceExtract:
         'GPT-5.5 is now available in Codex as OpenAI’s newest frontier model and is the recommended choice for most Codex tasks.',

@@ -28,16 +28,16 @@ export const META: OrchestratorMeta = {
     {
       vendor: 'Anthropic',
       kind: 'cli-subprocess',
-      notes: 'Wraps the Claude Code CLI as a subprocess; auth delegated to the underlying CLI (subscription or API key).',
-      sourceUrl: 'https://www.conductor.build/docs/concepts/agent-modes',
-      sourceExtract: 'Use Claude Code or Codex when you want a coding agent in a Conductor workspace.',
+      sourceUrl: 'https://www.conductor.build/docs/faq',
+      sourceExtract:
+        'Conductor comes bundled with its own installation of Claude Code and Codex, so that we can ensure compatibility. […] By default, Conductor uses the auth tokens already saved on your machine.',
     },
     {
       vendor: 'OpenAI',
       kind: 'cli-subprocess',
-      notes: 'Wraps the Codex CLI as a subprocess; auth delegated to the underlying CLI.',
-      sourceUrl: 'https://www.conductor.build/docs/concepts/agent-modes',
-      sourceExtract: 'Use Claude Code or Codex when you want a coding agent in a Conductor workspace.',
+      sourceUrl: 'https://www.conductor.build/docs/faq',
+      sourceExtract:
+        'Conductor comes bundled with its own installation of Claude Code and Codex, so that we can ensure compatibility. […] By default, Conductor uses the auth tokens already saved on your machine.',
     },
   ],
   trackingSources: [

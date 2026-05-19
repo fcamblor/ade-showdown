@@ -35,9 +35,7 @@ export const META: OrchestratorMeta = {
   modelIntegrations: [
     {
       vendor: 'Multi-vendor',
-      kind: 'provider-sdk',
-      notes:
-        'AI provider agnostic — direct SDKs for OpenAI, Anthropic, Gemini, AWS Bedrock, Mistral, xAI, Docker Model Runner, and more. External tools wired via the Docker MCP Gateway.',
+      kind: 'unknown',
       sourceUrl: 'https://github.com/docker/cagent',
       sourceExtract:
         'AI provider agnostic — OpenAI, Anthropic, Gemini, AWS Bedrock, Mistral, xAI, Docker Model Runner, and more.',
