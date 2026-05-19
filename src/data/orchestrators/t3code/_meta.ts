@@ -39,7 +39,6 @@ export const META: OrchestratorMeta = {
     {
       vendor: 'OpenAI',
       kind: 'app-server-jsonrpc',
-      notes: 'Codex via `codex app-server` (JSON-RPC over stdio) — primary integration.',
       sourceUrl: 'https://github.com/pingdotgg/t3code/blob/main/AGENTS.md',
       sourceExtract:
         'T3 Code is currently Codex-first. The server starts `codex app-server` (JSON-RPC over stdio) per provider session, then streams structured events to the browser through WebSocket push messages.',
@@ -47,16 +46,20 @@ export const META: OrchestratorMeta = {
     {
       vendor: 'Anthropic',
       kind: 'cli-subprocess',
-      notes: 'Claude Code via the `claude` binary as a subprocess.',
+      sourceUrl: 'https://github.com/pingdotgg/t3code/blob/main/README.md',
+      sourceExtract:
+        'T3 Code currently supports Codex, Claude, and OpenCode. […] Claude: install Claude Code and run `claude auth login`.',
     },
     {
       vendor: 'OpenCode',
       kind: 'cli-subprocess',
+      sourceUrl: 'https://github.com/pingdotgg/t3code/blob/main/README.md',
+      sourceExtract:
+        'T3 Code currently supports Codex, Claude, and OpenCode. […] OpenCode: install OpenCode and run `opencode auth login`.',
     },
     {
       vendor: 'Cursor',
-      kind: 'cli-subprocess',
-      notes: 'Cursor Agent CLI as a subprocess.',
+      kind: 'unknown',
     },
   ],
   trackingSources: [

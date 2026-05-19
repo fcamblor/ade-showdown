@@ -40,11 +40,31 @@ export const META: OrchestratorMeta = {
   modelIntegrations: [
     {
       vendor: 'Anthropic',
-      kind: 'provider-sdk',
-      notes: 'Direct Anthropic API; also reachable via AWS Bedrock, Google Vertex AI and Azure Foundry gateways.',
+      kind: 'unknown',
       sourceUrl: 'https://code.claude.com/docs/en/model-config',
       sourceExtract:
-        'Anthropic API: A full model name — Bedrock: an inference profile ARN — Foundry: a deployment name — Vertex: a version name.',
+        'On the Anthropic API and Claude Platform on AWS, `opus` resolves to Opus 4.7 and `sonnet` resolves to Sonnet 4.6.',
+    },
+    {
+      vendor: 'AWS Bedrock',
+      kind: 'unknown',
+      sourceUrl: 'https://code.claude.com/docs/en/model-config',
+      sourceExtract:
+        'When deploying Claude Code through Bedrock, Vertex AI, Foundry, or Claude Platform on AWS, pin model versions before rolling out to users.',
+    },
+    {
+      vendor: 'Google Vertex AI',
+      kind: 'unknown',
+      sourceUrl: 'https://code.claude.com/docs/en/model-config',
+      sourceExtract:
+        'When deploying Claude Code through Bedrock, Vertex AI, Foundry, or Claude Platform on AWS, pin model versions before rolling out to users.',
+    },
+    {
+      vendor: 'Azure Foundry',
+      kind: 'unknown',
+      sourceUrl: 'https://code.claude.com/docs/en/model-config',
+      sourceExtract:
+        'When deploying Claude Code through Bedrock, Vertex AI, Foundry, or Claude Platform on AWS, pin model versions before rolling out to users.',
     },
   ],
   trackingSources: [

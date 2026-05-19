@@ -43,6 +43,7 @@ const integrationKindLabel: Record<ModelIntegrationKind, string> = {
   'openai-compatible-api': 'OpenAI API',
   'mcp': 'MCP',
   'other': 'Other',
+  'unknown': '?',
 };
 const integrationKindTooltip: Record<ModelIntegrationKind, string> = {
   'provider-sdk': 'Vendor SDK — calls the provider library directly',
@@ -52,6 +53,7 @@ const integrationKindTooltip: Record<ModelIntegrationKind, string> = {
   'openai-compatible-api': 'OpenAI-compatible HTTP API — any endpoint speaking the OpenAI schema',
   'mcp': 'Model Context Protocol server exposing the model',
   'other': 'Other integration mechanism',
+  'unknown': 'Integration mechanism not documented / not verified',
 };
 
 const platformLabel: Record<Platform, string> = {
@@ -1167,6 +1169,7 @@ const featureCount = visibleFeatures.length;
   .wiring__kind--openai-compatible-api { color: oklch(0.85 0.12 165); border-color: oklch(0.42 0.06 165); }
   .wiring__kind--mcp                 { color: oklch(0.85 0.13 305); border-color: oklch(0.42 0.07 305); }
   .wiring__kind--other               { color: var(--fg-muted); border-color: var(--border); }
+  .wiring__kind--unknown             { color: var(--fg-faint); border-color: var(--border); font-style: italic; }
   .wiring__notes {
     margin: 2px 0 0;
     padding-left: calc(0.72rem + 6px); /* align with text after the connector arrow */

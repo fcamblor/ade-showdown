@@ -103,6 +103,7 @@ export const ModelIntegrationKindSchema = z.enum([
   'openai-compatible-api',
   'mcp',
   'other',
+  'unknown',
 ]);
 export type ModelIntegrationKind = z.infer<typeof ModelIntegrationKindSchema>;
 
