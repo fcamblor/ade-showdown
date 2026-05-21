@@ -301,6 +301,14 @@ const features: Feature[] = [
       'Navigate back to any past message in a discussion and resume from there — truncating or branching the conversation history. An advanced variant also rolls back the workspace filesystem state to match the message, so the agent restarts from the exact code context it had at that point.',
   },
   {
+    id: 'readonly-plan-research-mode',
+    label: 'Read-only plan/research mode',
+    category: 'workflow',
+    shortDescription: 'Toggle a read-only discussion mode for researching the codebase and preparing an implementation plan.',
+    longDescription:
+      'A discussion mode where the agent can inspect and reason over the codebase without editing it, typically using a stronger thinking model to prepare context, architecture notes, and an implementation plan that can then be handed off to a cheaper implementation model without advanced thinking.',
+  },
+  {
     id: 'predefined-deterministic-workflows',
     label: 'Predefined deterministic workflows',
     category: 'workflow',

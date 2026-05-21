@@ -518,6 +518,7 @@ export const LATEST_KNOWN_FEATURES: FeatureSupport[] = [
       },
     ],
   },
+  { featureId: 'readonly-plan-research-mode', support: 'unknown', screenshots: [] },
   { featureId: 'in-app-voice-input', support: 'unknown', screenshots: [] },
   { featureId: 'web-preview-annotation', support: 'unknown', screenshots: [] },
   { featureId: 'web-preview-element-inspector', support: 'unknown', screenshots: [] },

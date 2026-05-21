@@ -50,6 +50,7 @@ export const FEATURE_IDS = [
   'symlink-from-origin-workspace',
   'chat-user-questions',
   'chat-rewind',
+  'readonly-plan-research-mode',
   'predefined-deterministic-workflows',
   'custom-deterministic-workflows',
   'shared-discussion-workflows',

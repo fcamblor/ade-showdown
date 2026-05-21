@@ -348,6 +348,7 @@ export const LATEST_KNOWN_FEATURES: FeatureSupport[] = [
     note: 'No documented inline rendering of agent user-question tools (AskUserQuestion-style) in the Vibe Kanban chat surface.',
     screenshots: [],
   },
+  { featureId: 'readonly-plan-research-mode', support: 'unknown', screenshots: [] },
   { featureId: 'in-app-voice-input', support: 'unknown', screenshots: [] },
   { featureId: 'web-preview-annotation', support: 'unknown', screenshots: [] },
   { featureId: 'web-preview-element-inspector', support: 'unknown', screenshots: [] },

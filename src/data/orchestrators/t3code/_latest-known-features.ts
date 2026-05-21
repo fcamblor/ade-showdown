@@ -366,6 +366,7 @@ export const LATEST_KNOWN_FEATURES: FeatureSupport[] = [
     sourceExtract:
       'if (toolName === "AskUserQuestion") { return yield* handleAskUserQuestion(context, toolInput, callbackOptions); } […] handleAskUserQuestion emits a `user-input.requested` runtime event and waits for the user to respond via `respondToUserInput`.',
   },
+  { featureId: 'readonly-plan-research-mode', support: 'unknown', screenshots: [] },
   { featureId: 'in-app-voice-input', support: 'unknown', screenshots: [] },
   { featureId: 'web-preview-annotation', support: 'unknown', screenshots: [] },
   { featureId: 'web-preview-element-inspector', support: 'unknown', screenshots: [] },

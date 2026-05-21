@@ -179,6 +179,7 @@ export const LATEST_KNOWN_FEATURES: FeatureSupport[] = [
   { featureId: 'copy-from-origin-workspace', support: 'no', screenshots: [] },
   { featureId: 'symlink-from-origin-workspace', support: 'no', screenshots: [] },
   { featureId: 'chat-user-questions', support: 'no', screenshots: [], note: 'TUI-only CLI; no chat surface to render inline user-question tools.' },
+  { featureId: 'readonly-plan-research-mode', support: 'unknown', screenshots: [] },
   { featureId: 'in-app-voice-input', support: 'unknown', screenshots: [] },
   { featureId: 'web-preview-annotation', support: 'unknown', screenshots: [] },
   { featureId: 'web-preview-element-inspector', support: 'unknown', screenshots: [] },
