@@ -26,6 +26,7 @@ const features: Feature[] = [
     id: 'local-execution',
     label: 'Local execution',
     category: 'platform',
+    status: 'waiting-for-review',
     shortDescription: 'Agents run on the developer machine.',
   },
   {
@@ -78,6 +79,7 @@ const features: Feature[] = [
     id: 'self-hosted',
     label: 'Self-hosted',
     category: 'platform',
+    status: 'waiting-for-review',
     shortDescription: 'Can be deployed on your own infrastructure.',
   },
   {
@@ -121,12 +123,6 @@ const features: Feature[] = [
     shortDescription: 'Expose env vars to shell scripts, including a pool of free ports allocated to the current worktree.',
     longDescription:
       'Each worktree gets a dedicated pool of free ports, exposed via environment variables to scripts and run configurations, so multiple worktrees can run their own web server / DB / backend in parallel without conflicts.',
-  },
-  {
-    id: 'supported-assistants',
-    label: 'Supported assistants / CLIs',
-    category: 'integrations',
-    shortDescription: 'Range of coding assistants/CLIs supported (Claude Code, Codex, Cursor, Aider…).',
   },
   {
     id: 'diff-comments',
@@ -185,10 +181,12 @@ const features: Feature[] = [
       'A dedicated gitignored directory (e.g. .context) lets sessions persist artifacts like plans, notes or handoff files that subsequent sessions on the same worktree can reference.',
   },
   {
-    id: 'remote-file-sharing',
-    label: 'Remote file sharing for annotation',
+    id: 'remote-plan-collaboration',
+    label: 'Remote plan collaboration',
     category: 'collaboration',
-    shortDescription: 'Share files remotely with teammates for external annotation (e.g. plannotator.ai).',
+    shortDescription: 'Share planning artifacts remotely with teammates for async review and annotation.',
+    longDescription:
+      'A first-class way to publish or share a plan / session artifact with teammates so they can review, comment, or annotate remotely, without needing direct access to the local worktree.',
   },
   {
     id: 'shared-config',
@@ -206,9 +204,11 @@ const features: Feature[] = [
   },
   {
     id: 'remote-session-control',
-    label: 'Remote control of sessions',
+    label: 'Remote ADE control',
     category: 'workflow',
-    shortDescription: 'Drive and control agent sessions remotely (e.g. from a phone or another device).',
+    shortDescription: 'Drive the ADE itself remotely from another device, not merely the underlying coding agent.',
+    longDescription:
+      'Remote control of the Agent Development Environment as a product surface — e.g. open the ADE from a phone, inspect sessions, send prompts, approve actions, or manage runs. Remote-control features provided solely by an embedded coding agent do not count unless the ADE exposes and owns the remote control surface.',
   },
   {
     id: 'context-fill-indicator',
@@ -236,7 +236,19 @@ const features: Feature[] = [
     category: 'ux',
     shortDescription: 'Built-in browser preview of a local web server, ideally bound to a run configuration / allocated port.',
     longDescription:
-      'In-app web preview pane that renders the output of a local HTTP server. "Partial" covers a pane that merely displays the preview. A "full / yes" support means the orchestrator can also drive the preview (clicks, navigation, form input) AND "see" its rendered content (DOM/screenshot) so the agent can take action on it — e.g. validate UI changes, debug a layout, retry a flow on its own.',
+      'In-app web preview pane that renders the output of a local HTTP server. "Partial" covers an external-browser launch or a pane that merely displays the preview. A "yes" requires an embedded preview integrated with the ADE workflow. Annotation and element inspection are tracked as separate feature rows.',
+  },
+  {
+    id: 'web-preview-annotation',
+    label: 'Web preview annotation',
+    category: 'ux',
+    shortDescription: 'Annotate regions of the embedded web preview and feed that visual feedback back into the discussion.',
+  },
+  {
+    id: 'web-preview-element-inspector',
+    label: 'Web preview element inspector',
+    category: 'ux',
+    shortDescription: 'Inspect or select DOM elements in the embedded web preview so the discussion can target exact UI nodes.',
   },
   {
     id: 'plugin-system',
@@ -289,20 +301,28 @@ const features: Feature[] = [
       'Navigate back to any past message in a discussion and resume from there — truncating or branching the conversation history. An advanced variant also rolls back the workspace filesystem state to match the message, so the agent restarts from the exact code context it had at that point.',
   },
   {
-    id: 'predefined-workflows-sessions',
-    label: 'Predefined workflow sessions',
+    id: 'readonly-plan-research-mode',
+    label: 'Read-only plan/research mode',
     category: 'workflow',
-    shortDescription: 'Start a chat session that follows one of several built-in workflows (research → plan → implement → review, idea-to-PR, bug-repro-and-fix, debugging-session…).',
+    shortDescription: 'Toggle a read-only discussion mode for researching the codebase and preparing an implementation plan.',
     longDescription:
-      'Launch a discussion that walks through a fixed sequence of phases, picked from a catalog of built-in workflows — e.g. research → plan → implement → review, idea-to-PR, bug-repro-and-fix, debugging-session — each with phase-specific prompts, models or tool permissions, instead of a free-form single-turn loop.',
+      'A discussion mode where the agent can inspect and reason over the codebase without editing it, typically using a stronger thinking model to prepare context, architecture notes, and an implementation plan that can then be handed off to a cheaper implementation model without advanced thinking.',
   },
   {
-    id: 'custom-discussion-workflows',
-    label: 'Custom discussion workflows',
+    id: 'predefined-deterministic-workflows',
+    label: 'Predefined deterministic workflows',
+    category: 'workflow',
+    shortDescription: 'Start a chat session that follows a deterministic built-in workflow (research → plan → implement → review, idea-to-PR, bug-repro-and-fix…).',
+    longDescription:
+      'Launch a discussion that walks through a fixed deterministic sequence of phases, picked from a catalog of built-in workflows — e.g. research → plan → implement → review, idea-to-PR, bug-repro-and-fix, debugging-session — each with phase-specific prompts, models or tool permissions, instead of a free-form single-turn loop.',
+  },
+  {
+    id: 'custom-deterministic-workflows',
+    label: 'Custom deterministic workflows',
     category: 'workflow',
     shortDescription: 'Author custom multi-step workflows to add determinism to discussion sessions.',
     longDescription:
-      'Define your own discussion workflows — ordered phases, per-step prompts, gating conditions, model/tool overrides — to make agent sessions more deterministic and repeatable across runs.',
+      'Define your own deterministic discussion workflows — ordered phases, per-step prompts, gating conditions, model/tool overrides — to make agent sessions repeatable across runs.',
   },
   {
     id: 'shared-discussion-workflows',
@@ -319,6 +339,42 @@ const features: Feature[] = [
     shortDescription: 'Clone the current workspace (worktree state + session history) into a new worktree to branch off explorations.',
     longDescription:
       'Fork the entire state of a workspace — git worktree contents, session/chat history, and any local-only files — into a brand-new worktree, so you can branch off an alternative exploration without disturbing the original session.',
+  },
+  {
+    id: 'in-app-voice-input',
+    label: 'In-app voice input',
+    category: 'ux',
+    shortDescription: 'Dictate prompts or chat messages directly inside the ADE.',
+  },
+  {
+    id: 'local-target-branch-merge',
+    label: 'Local merge to target branch',
+    category: 'workflow',
+    shortDescription: 'Merge the current work locally into the configured target branch directly from the ADE.',
+  },
+  {
+    id: 'llm-assisted-merge-rebase',
+    label: 'LLM-assisted merge/rebase',
+    category: 'workflow',
+    shortDescription: 'Merge or rebase onto a chosen branch, defaulting to the target branch, with conflicts resolved through the LLM.',
+  },
+  {
+    id: 'chat-message-stacking',
+    label: 'Chat message stacking',
+    category: 'ux',
+    shortDescription: 'Queue several user messages in the chat so they are sent or applied as a stacked sequence.',
+  },
+  {
+    id: 'multi-repository-view',
+    label: 'Multi-repository view',
+    category: 'workflow',
+    shortDescription: 'Show multiple repositories at once and filter the UI to focus on selected repositories.',
+  },
+  {
+    id: 'multi-repository-chat-targeting',
+    label: 'Multi-repository chat targeting',
+    category: 'workflow',
+    shortDescription: 'Target several repositories, such as frontend and backend, within one discussion.',
   },
 ];
 

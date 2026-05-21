@@ -103,7 +103,9 @@ const categoryOrder: FeatureCategory[] = [
 const grouped = categoryOrder
   .map((cat) => ({
     category: cat,
-    features: FEATURES.filter((f) => f.category === cat),
+    features: FEATURES.filter(
+      (f) => f.category === cat && (f.status ?? 'approved') !== 'waiting-for-review',
+    ),
   }))
   .filter((g) => g.features.length > 0);
 

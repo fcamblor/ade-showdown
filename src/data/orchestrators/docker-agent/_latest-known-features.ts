@@ -100,12 +100,6 @@ export const LATEST_KNOWN_FEATURES: FeatureSupport[] = [
   { featureId: 'workflow-shell-hooks', support: 'no', screenshots: [] },
   { featureId: 'run-configurations', support: 'no', screenshots: [] },
   { featureId: 'worktree-port-env-vars', support: 'no', screenshots: [] },
-  {
-    featureId: 'supported-assistants',
-    support: 'no',
-    note: 'cagent is itself an agent runtime, not a wrapper around third-party coding CLIs (Claude Code, Codex, etc.).',
-    screenshots: [],
-  },
   { featureId: 'diff-comments', support: 'no', screenshots: [] },
   { featureId: 'github-comment-sync', support: 'no', screenshots: [] },
   {
@@ -131,7 +125,7 @@ export const LATEST_KNOWN_FEATURES: FeatureSupport[] = [
     sourceUrl: 'https://github.com/docker/cagent',
     sourceExtract: '-s, --session-db string  Path to the session database (default "session.db").',
   },
-  { featureId: 'remote-file-sharing', support: 'no', screenshots: [] },
+  { featureId: 'remote-plan-collaboration', support: 'no', screenshots: [] },
   {
     featureId: 'shared-config',
     support: 'yes',
@@ -144,8 +138,8 @@ export const LATEST_KNOWN_FEATURES: FeatureSupport[] = [
   { featureId: 'pr-status-sync', support: 'no', screenshots: [] },
   {
     featureId: 'remote-session-control',
-    support: 'partial',
-    note: '`cagent api` exposes the agent over HTTP on a configurable port, which enables remote drivers, but no first-party mobile/remote client is shipped.',
+    support: 'no',
+    note: '`cagent api` exposes the agent runtime over HTTP, but this row requires remote control of an ADE product surface itself; no first-party remote ADE client is shipped.',
     screenshots: [],
     sourceUrl: 'https://github.com/docker/cagent',
     sourceExtract:
@@ -185,4 +179,13 @@ export const LATEST_KNOWN_FEATURES: FeatureSupport[] = [
   { featureId: 'copy-from-origin-workspace', support: 'no', screenshots: [] },
   { featureId: 'symlink-from-origin-workspace', support: 'no', screenshots: [] },
   { featureId: 'chat-user-questions', support: 'no', screenshots: [], note: 'TUI-only CLI; no chat surface to render inline user-question tools.' },
+  { featureId: 'readonly-plan-research-mode', support: 'unknown', screenshots: [] },
+  { featureId: 'in-app-voice-input', support: 'unknown', screenshots: [] },
+  { featureId: 'web-preview-annotation', support: 'unknown', screenshots: [] },
+  { featureId: 'web-preview-element-inspector', support: 'unknown', screenshots: [] },
+  { featureId: 'local-target-branch-merge', support: 'unknown', screenshots: [] },
+  { featureId: 'llm-assisted-merge-rebase', support: 'unknown', screenshots: [] },
+  { featureId: 'chat-message-stacking', support: 'unknown', screenshots: [] },
+  { featureId: 'multi-repository-view', support: 'unknown', screenshots: [] },
+  { featureId: 'multi-repository-chat-targeting', support: 'unknown', screenshots: [] },
 ];

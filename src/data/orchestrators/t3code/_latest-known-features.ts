@@ -150,15 +150,6 @@ export const LATEST_KNOWN_FEATURES: FeatureSupport[] = [
     sourceExtract: 'T3CODE_PROJECT_ROOT, T3CODE_WORKTREE_PATH.',
   },
   {
-    featureId: 'supported-assistants',
-    support: 'yes',
-    note: 'Claude Code, Codex CLI, OpenCode, Cursor.',
-    screenshots: [],
-    sourceUrl: 'https://github.com/pingdotgg/t3code/blob/main/README.md',
-    sourceExtract:
-      'T3 Code currently supports Codex, Claude, and OpenCode. Install and authenticate at least one provider before use: Codex CLI (codex login), Claude Code (claude auth login), OpenCode (opencode auth login).',
-  },
-  {
     featureId: 'diff-comments',
     support: 'no',
     note: 'No comment/annotation surface on the diff panel found in the codebase.',
@@ -225,9 +216,9 @@ export const LATEST_KNOWN_FEATURES: FeatureSupport[] = [
       'const handleSaveToWorkspace = useCallback(() => { […] void api.projects.writeFile({ cwd: workspaceRoot, relativePath: filename, contents: normalizePlanMarkdownForExport(planMarkdown) })',
   },
   {
-    featureId: 'remote-file-sharing',
+    featureId: 'remote-plan-collaboration',
     support: 'no',
-    note: 'No external annotation/sharing feature documented.',
+    note: 'No external plan-collaboration feature documented.',
     screenshots: [],
   },
   {
@@ -342,13 +333,13 @@ export const LATEST_KNOWN_FEATURES: FeatureSupport[] = [
       'Revert this thread to checkpoint ${turnCount}? This will discard newer messages and turn diffs in this thread. This action cannot be undone. […] api.orchestration.dispatchCommand({ type: "thread.checkpoint.revert", … }).',
   },
   {
-    featureId: 'predefined-workflows-sessions',
+    featureId: 'predefined-deterministic-workflows',
     support: 'no',
     note: 'No built-in phased workflow (research/plan/implement/review) documented for chat threads.',
     screenshots: [],
   },
   {
-    featureId: 'custom-discussion-workflows',
+    featureId: 'custom-deterministic-workflows',
     support: 'no',
     note: 'Project scripts and provider skills exist, but no multi-step discussion-workflow definition documented.',
     screenshots: [],
@@ -375,4 +366,13 @@ export const LATEST_KNOWN_FEATURES: FeatureSupport[] = [
     sourceExtract:
       'if (toolName === "AskUserQuestion") { return yield* handleAskUserQuestion(context, toolInput, callbackOptions); } […] handleAskUserQuestion emits a `user-input.requested` runtime event and waits for the user to respond via `respondToUserInput`.',
   },
+  { featureId: 'readonly-plan-research-mode', support: 'unknown', screenshots: [] },
+  { featureId: 'in-app-voice-input', support: 'unknown', screenshots: [] },
+  { featureId: 'web-preview-annotation', support: 'unknown', screenshots: [] },
+  { featureId: 'web-preview-element-inspector', support: 'unknown', screenshots: [] },
+  { featureId: 'local-target-branch-merge', support: 'unknown', screenshots: [] },
+  { featureId: 'llm-assisted-merge-rebase', support: 'unknown', screenshots: [] },
+  { featureId: 'chat-message-stacking', support: 'unknown', screenshots: [] },
+  { featureId: 'multi-repository-view', support: 'unknown', screenshots: [] },
+  { featureId: 'multi-repository-chat-targeting', support: 'unknown', screenshots: [] },
 ];

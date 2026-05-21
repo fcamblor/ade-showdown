@@ -253,19 +253,6 @@ export const LATEST_KNOWN_FEATURES: FeatureSupport[] = [
     sourceExtract: 'CONDUCTOR_PORT — First port in a range of 10 ports assigned to the workspace.',
   },
   {
-    featureId: 'supported-assistants',
-    support: 'partial',
-    note: 'Only Claude Code and Codex are supported as built-in coding agents. No native integration with other CLIs (Cursor, Aider, Gemini CLI…), local models (Ollama), or niche models (DeepSeek, Kimi, etc.).',
-    screenshots: [
-      {
-        src: '/screenshots/conductor/supported-assistants_20260518_1.png',
-        alt: 'Conductor Providers settings panel listing only Claude Code and Codex as configurable coding agents',
-      },
-    ],
-    sourceUrl: 'https://www.conductor.build/docs/concepts/agent-modes',
-    sourceExtract: 'Use Claude Code or Codex when you want a coding agent in a Conductor workspace.',
-  },
-  {
     featureId: 'diff-comments',
     support: 'yes',
     note: 'Comments on changed lines are sent back to the agent as precise context.',
@@ -386,9 +373,9 @@ export const LATEST_KNOWN_FEATURES: FeatureSupport[] = [
       'All new workspaces now have a `.context` directory. Attachments, plans, and notes are automatically stored here.',
   },
   {
-    featureId: 'remote-file-sharing',
+    featureId: 'remote-plan-collaboration',
     support: 'no',
-    note: 'No remote file-sharing-for-annotation surface in Conductor 0.52.3 (no doc/changelog/homepage mention).',
+    note: 'No remote plan-collaboration surface in Conductor 0.52.3 (no doc/changelog/homepage mention).',
     screenshots: [],
   },
   {
@@ -558,13 +545,13 @@ export const LATEST_KNOWN_FEATURES: FeatureSupport[] = [
     ],
   },
   {
-    featureId: 'predefined-workflows-sessions',
+    featureId: 'predefined-deterministic-workflows',
     support: 'no',
     note: 'Chats are free-form within a workspace; no built-in research/plan/implement/review phased workflow documented.',
     screenshots: [],
   },
   {
-    featureId: 'custom-discussion-workflows',
+    featureId: 'custom-deterministic-workflows',
     support: 'no',
     note: 'No user-authored multi-step discussion workflow mechanism documented.',
     screenshots: [],
@@ -600,4 +587,13 @@ export const LATEST_KNOWN_FEATURES: FeatureSupport[] = [
       },
     ],
   },
+  { featureId: 'readonly-plan-research-mode', support: 'unknown', screenshots: [] },
+  { featureId: 'in-app-voice-input', support: 'unknown', screenshots: [] },
+  { featureId: 'web-preview-annotation', support: 'unknown', screenshots: [] },
+  { featureId: 'web-preview-element-inspector', support: 'unknown', screenshots: [] },
+  { featureId: 'local-target-branch-merge', support: 'unknown', screenshots: [] },
+  { featureId: 'llm-assisted-merge-rebase', support: 'unknown', screenshots: [] },
+  { featureId: 'chat-message-stacking', support: 'unknown', screenshots: [] },
+  { featureId: 'multi-repository-view', support: 'unknown', screenshots: [] },
+  { featureId: 'multi-repository-chat-targeting', support: 'unknown', screenshots: [] },
 ];

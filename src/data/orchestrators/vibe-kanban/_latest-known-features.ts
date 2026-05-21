@@ -137,15 +137,6 @@ export const LATEST_KNOWN_FEATURES: FeatureSupport[] = [
     screenshots: [],
   },
   {
-    featureId: 'supported-assistants',
-    support: 'yes',
-    note: 'Claude Code, Codex, Gemini, Copilot, Amp, Cursor, OpenCode, Droid, CCR, Qwen Code.',
-    screenshots: [],
-    sourceUrl: 'https://vibekanban.com/docs/supported-coding-agents',
-    sourceExtract:
-      'Vibe Kanban integrates with a variety of coding agents: Claude Code, OpenAI Codex, GitHub Copilot, Gemini CLI, Amp, Cursor Agent CLI, OpenCode, Droid CLI, Claude Code Router, Qwen Code.',
-  },
-  {
     featureId: 'diff-comments',
     support: 'yes',
     note: 'Inline comments collected and sent to the agent in the next message.',
@@ -212,9 +203,9 @@ export const LATEST_KNOWN_FEATURES: FeatureSupport[] = [
       "New sessions don't inherit conversation history. The new agent won't know what happened in previous sessions unless you explain it again or it reads the file changes.",
   },
   {
-    featureId: 'remote-file-sharing',
+    featureId: 'remote-plan-collaboration',
     support: 'no',
-    note: 'No file-sharing-for-annotation feature documented.',
+    note: 'No remote plan-collaboration feature documented.',
     screenshots: [],
   },
   {
@@ -325,13 +316,13 @@ export const LATEST_KNOWN_FEATURES: FeatureSupport[] = [
     screenshots: [],
   },
   {
-    featureId: 'predefined-workflows-sessions',
+    featureId: 'predefined-deterministic-workflows',
     support: 'no',
     note: 'Chat sessions are free-form; no built-in research/plan/implement/review phased workflow documented.',
     screenshots: [],
   },
   {
-    featureId: 'custom-discussion-workflows',
+    featureId: 'custom-deterministic-workflows',
     support: 'no',
     note: 'Slash commands surface single prompts but no multi-step discussion-workflow authoring is documented.',
     screenshots: [],
@@ -357,4 +348,13 @@ export const LATEST_KNOWN_FEATURES: FeatureSupport[] = [
     note: 'No documented inline rendering of agent user-question tools (AskUserQuestion-style) in the Vibe Kanban chat surface.',
     screenshots: [],
   },
+  { featureId: 'readonly-plan-research-mode', support: 'unknown', screenshots: [] },
+  { featureId: 'in-app-voice-input', support: 'unknown', screenshots: [] },
+  { featureId: 'web-preview-annotation', support: 'unknown', screenshots: [] },
+  { featureId: 'web-preview-element-inspector', support: 'unknown', screenshots: [] },
+  { featureId: 'local-target-branch-merge', support: 'unknown', screenshots: [] },
+  { featureId: 'llm-assisted-merge-rebase', support: 'unknown', screenshots: [] },
+  { featureId: 'chat-message-stacking', support: 'unknown', screenshots: [] },
+  { featureId: 'multi-repository-view', support: 'unknown', screenshots: [] },
+  { featureId: 'multi-repository-chat-targeting', support: 'unknown', screenshots: [] },
 ];
