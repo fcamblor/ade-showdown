@@ -78,6 +78,11 @@ export const LATEST_KNOWN_FEATURES: FeatureSupport[] = [
         alt: 'TODO',
         caption: 'TODO',
       },
+      {
+        src: '/screenshots/claude-code-desktop/pr-creation_20260521_3.png',
+        alt: 'TODO',
+        caption: 'TODO',
+      },
     ],
     sourceUrl: 'https://code.claude.com/docs/en/desktop',
     sourceExtract:
@@ -236,7 +241,13 @@ export const LATEST_KNOWN_FEATURES: FeatureSupport[] = [
     featureId: 'github-comment-sync',
     support: 'no',
     note: 'The CI status bar in Desktop tracks check results but no documented ingestion of GitHub PR review comments into the in-app diff viewer.',
-    screenshots: [],
+    screenshots: [
+      {
+        src: '/screenshots/claude-code-desktop/github-comment-sync_20260521_1.png',
+        alt: 'TODO',
+        caption: 'TODO',
+      },
+    ],
   },
   {
     featureId: 'terminal-in-worktree',
@@ -333,7 +344,18 @@ export const LATEST_KNOWN_FEATURES: FeatureSupport[] = [
     featureId: 'pr-status-sync',
     support: 'yes',
     note: 'Desktop CI status bar tracks PR checks; auto-archive setting closes the session when the PR merges or closes.',
-    screenshots: [],
+    screenshots: [
+      {
+        src: '/screenshots/claude-code-desktop/pr-status-sync_20260521_1.png',
+        alt: 'TODO',
+        caption: 'TODO',
+      },
+      {
+        src: '/screenshots/claude-code-desktop/pr-status-sync_20260521_2.png',
+        alt: 'TODO',
+        caption: 'TODO',
+      },
+    ],
     sourceUrl: 'https://code.claude.com/docs/en/desktop',
     sourceExtract:
       'After you open a pull request, a CI status bar appears in the session. […] To archive the session automatically once the PR merges or closes, turn on auto-archive in Settings → Claude Code.',
@@ -530,6 +552,12 @@ export const LATEST_KNOWN_FEATURES: FeatureSupport[] = [
     featureId: 'chat-user-questions',
     support: 'no',
     note: 'No documented inline rendering of `AskUserQuestion`-style tool calls in the Desktop chat surface; the answer surface remains free-form text.',
-    screenshots: [],
+    screenshots: [
+      {
+        src: '/screenshots/claude-code-desktop/chat-user-questions_20260521_1.png',
+        alt: 'TODO',
+        caption: 'TODO',
+      },
+    ],
   },
 ];
