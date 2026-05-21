@@ -2,7 +2,7 @@ import { FeatureSchema, type Feature } from './schema';
 import { z } from 'zod';
 
 const features: Feature[] = [
-{
+  {
     id: 'git-worktrees',
     label: 'Git worktree isolation',
     category: 'workflow',
