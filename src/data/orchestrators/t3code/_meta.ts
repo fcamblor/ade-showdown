@@ -59,7 +59,10 @@ export const META: OrchestratorMeta = {
     },
     {
       vendor: 'Cursor',
-      kind: 'unknown',
+      kind: 'acp',
+      sourceUrl:
+        'https://github.com/pingdotgg/t3code/blob/main/apps/server/src/provider/Layers/CursorAdapter.ts',
+      sourceExtract: 'CursorAdapterLive — Cursor CLI (`agent acp`) via ACP.',
     },
   ],
   trackingSources: [
