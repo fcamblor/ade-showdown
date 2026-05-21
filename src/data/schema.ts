@@ -20,6 +20,9 @@ export const FeatureSchema = z.object({
   id: FeatureIdSchema,
   label: z.string(),
   category: FeatureCategorySchema,
+  /** Defaults to 'approved'. Waiting-for-review features stay in data files
+   *  but are excluded from the public comparison table and score counts. */
+  status: z.enum(['approved', 'waiting-for-review']).optional(),
   shortDescription: z.string(),
   longDescription: z.string().optional(),
 });

@@ -142,12 +142,6 @@ export const LATEST_KNOWN_FEATURES: FeatureSupport[] = [
     screenshots: [],
   },
   {
-    featureId: 'supported-assistants',
-    support: 'no',
-    note: 'Codex App drives the Codex agent only; it does not orchestrate third-party CLIs (Claude Code, Cursor, etc.).',
-    screenshots: [],
-  },
-  {
     featureId: 'diff-comments',
     support: 'yes',
     note: 'Users can comment on the diff inside the thread; comments are surfaced back to the agent.',
@@ -210,9 +204,9 @@ export const LATEST_KNOWN_FEATURES: FeatureSupport[] = [
     screenshots: [],
   },
   {
-    featureId: 'remote-file-sharing',
+    featureId: 'remote-plan-collaboration',
     support: 'no',
-    note: 'No documented remote-annotation sharing feature.',
+    note: 'No documented remote plan-collaboration feature.',
     screenshots: [],
   },
   {
@@ -264,7 +258,7 @@ export const LATEST_KNOWN_FEATURES: FeatureSupport[] = [
   {
     featureId: 'web-preview',
     support: 'yes',
-    note: 'In-app browser added in April 2026 lets Codex operate local dev servers, navigate and annotate rendered pages — i.e. the orchestrator can both display and act on the preview (full criterion met).',
+    note: 'In-app browser added in April 2026 lets Codex operate local dev servers and navigate rendered pages — i.e. the orchestrator can both display and act on the preview.',
     screenshots: [],
     sourceUrl: 'https://developers.openai.com/codex/changelog',
     sourceExtract:
@@ -315,7 +309,7 @@ export const LATEST_KNOWN_FEATURES: FeatureSupport[] = [
       'TUI workflows easier to resume and copy from with redesigned resume/fork picker, raw scrollback mode.',
   },
   {
-    featureId: 'predefined-workflows-sessions',
+    featureId: 'predefined-deterministic-workflows',
     support: 'partial',
     note: 'Persisted `/goal` workflows (2026-04-30) cover create / pause / resume / clear across app-server APIs; predefined research→plan→implement catalog is not documented.',
     screenshots: [],
@@ -324,7 +318,7 @@ export const LATEST_KNOWN_FEATURES: FeatureSupport[] = [
       'Added persisted `/goal` workflows with app-server APIs, model tools, runtime continuation, and TUI controls for create, pause, resume, and clear.',
   },
   {
-    featureId: 'custom-discussion-workflows',
+    featureId: 'custom-deterministic-workflows',
     support: 'partial',
     note: 'Skills + `/goal` workflows let users author reusable multi-step flows; no fully deterministic ordered-phases workflow definition is documented.',
     screenshots: [],
@@ -356,4 +350,12 @@ export const LATEST_KNOWN_FEATURES: FeatureSupport[] = [
     sourceExtract:
       'TUI workflows easier to resume and copy from with redesigned resume/fork picker.',
   },
+  { featureId: 'in-app-voice-input', support: 'unknown', screenshots: [] },
+  { featureId: 'web-preview-annotation', support: 'unknown', screenshots: [] },
+  { featureId: 'web-preview-element-inspector', support: 'unknown', screenshots: [] },
+  { featureId: 'local-target-branch-merge', support: 'unknown', screenshots: [] },
+  { featureId: 'llm-assisted-merge-rebase', support: 'unknown', screenshots: [] },
+  { featureId: 'chat-message-stacking', support: 'unknown', screenshots: [] },
+  { featureId: 'multi-repository-view', support: 'unknown', screenshots: [] },
+  { featureId: 'multi-repository-chat-targeting', support: 'unknown', screenshots: [] },
 ];

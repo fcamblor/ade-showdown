@@ -139,12 +139,6 @@ export const LATEST_KNOWN_FEATURES: FeatureSupport[] = [
     sourceExtract: 'cp $ROOT_WORKTREE_PATH/.env .env',
   },
   {
-    featureId: 'supported-assistants',
-    support: 'no',
-    note: 'Cursor is itself the coding assistant — the Agents Window does not orchestrate external CLIs (Claude Code, Codex, Aider…).',
-    screenshots: [],
-  },
-  {
     featureId: 'diff-comments',
     support: 'partial',
     note: 'Inline comments exist on the PR Review surface (synced with GitHub). The local diffs view itself does not document standalone in-app diff comments.',
@@ -210,9 +204,9 @@ export const LATEST_KNOWN_FEATURES: FeatureSupport[] = [
     screenshots: [],
   },
   {
-    featureId: 'remote-file-sharing',
+    featureId: 'remote-plan-collaboration',
     support: 'no',
-    note: 'No file-sharing-for-annotation feature documented.',
+    note: 'No remote plan-collaboration feature documented.',
     screenshots: [],
   },
   {
@@ -235,7 +229,7 @@ export const LATEST_KNOWN_FEATURES: FeatureSupport[] = [
   {
     featureId: 'remote-session-control',
     support: 'yes',
-    note: 'Cloud agents accessible from web, iOS PWA, Slack, GitHub, Linear, API.',
+    note: 'Cursor exposes its Cloud Agent ADE surface from web, iOS PWA, Slack, GitHub, Linear, and API, so sessions can be started and managed remotely.',
     screenshots: [],
     sourceUrl: 'https://cursor.com/docs/cloud-agent/web-and-mobile',
     sourceExtract:
@@ -325,4 +319,12 @@ export const LATEST_KNOWN_FEATURES: FeatureSupport[] = [
     note: 'No documented inline rendering of agent user-question tools (AskUserQuestion-style) in the Cursor chat surface.',
     screenshots: [],
   },
+  { featureId: 'in-app-voice-input', support: 'unknown', screenshots: [] },
+  { featureId: 'web-preview-annotation', support: 'unknown', screenshots: [] },
+  { featureId: 'web-preview-element-inspector', support: 'unknown', screenshots: [] },
+  { featureId: 'local-target-branch-merge', support: 'unknown', screenshots: [] },
+  { featureId: 'llm-assisted-merge-rebase', support: 'unknown', screenshots: [] },
+  { featureId: 'chat-message-stacking', support: 'unknown', screenshots: [] },
+  { featureId: 'multi-repository-view', support: 'unknown', screenshots: [] },
+  { featureId: 'multi-repository-chat-targeting', support: 'unknown', screenshots: [] },
 ];

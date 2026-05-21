@@ -209,15 +209,6 @@ export const LATEST_KNOWN_FEATURES: FeatureSupport[] = [
       'When Claude picks a different port, it passes the assigned port to your server via the `PORT` environment variable.',
   },
   {
-    featureId: 'supported-assistants',
-    support: 'no',
-    note: 'Claude Code is itself the assistant (first-party); it does not orchestrate other coding assistants.',
-    screenshots: [],
-    sourceUrl: 'https://code.claude.com/docs/en/overview',
-    sourceExtract:
-      'Claude Code is an agentic coding tool that reads your codebase, edits files, runs commands, and integrates with your development tools.',
-  },
-  {
     featureId: 'diff-comments',
     support: 'yes',
     note: 'Click any line in the desktop diff to add a comment; Claude reads the comments and revises.',
@@ -321,9 +312,9 @@ export const LATEST_KNOWN_FEATURES: FeatureSupport[] = [
     screenshots: [],
   },
   {
-    featureId: 'remote-file-sharing',
+    featureId: 'remote-plan-collaboration',
     support: 'no',
-    note: 'No remote file-sharing-for-annotation feature in Claude Code Desktop. The app has no mechanism to share files with teammates for external annotation (no plannotator.ai integration or equivalent).',
+    note: 'No remote plan-collaboration feature documented for Claude Code Desktop. The app has no first-class way to share planning artifacts with teammates for remote review.',
     screenshots: [],
   },
   {
@@ -408,22 +399,12 @@ export const LATEST_KNOWN_FEATURES: FeatureSupport[] = [
   {
     featureId: 'web-preview',
     support: 'yes',
-    note: 'Desktop preview pane embeds a browser bound to `launch.json` dev servers; Claude can drive it (start dev server, hit API endpoints), read server logs, both display and act on the preview. User can annotate some area or copy/paste element DOM selector in the chat.',
+    note: 'Desktop preview pane embeds a browser bound to `launch.json` dev servers; Claude can drive it (start dev server, hit API endpoints), read server logs, and act on the preview.',
     screenshots: [
       {
         src: '/screenshots/claude-code-desktop/web-preview_20260521_1.png',
         alt: 'Claude Code Desktop with the Files panel open in the middle and an embedded browser preview on the right showing the ade-showdown website; an arrow points to launch.json in the file tree.',
         caption: 'Embedded browser preview pane bound to the dev server defined in launch.json, displayed alongside the file tree and chat.',
-      },
-      {
-        src: '/screenshots/claude-code-desktop/web-preview_20260521_2.png',
-        alt: 'Claude Code Desktop browser preview pane with an annotation toolbar at the bottom highlighted; the user can draw annotations directly on the live preview.',
-        caption: 'Annotation mode in the preview pane: users can draw rectangles or highlight areas to communicate UI feedback to Claude.',
-      },
-      {
-        src: '/screenshots/claude-code-desktop/web-preview_20260521_3.png',
-        alt: 'Claude Code Desktop browser preview with an active annotation rectangle drawn over part of the rendered page, and a DOM inspector tooltip showing element details.',
-        caption: 'Active annotation on the preview: a region is selected and element details are shown, allowing Claude to target specific DOM elements.',
       },
     ],
     sourceUrl: 'https://code.claude.com/docs/en/desktop',
@@ -491,13 +472,13 @@ export const LATEST_KNOWN_FEATURES: FeatureSupport[] = [
     ],
   },
   {
-    featureId: 'predefined-workflows-sessions',
+    featureId: 'predefined-deterministic-workflows',
     support: 'no',
     note: 'No built-in research/plan/implement/review phased workflow; Plan Mode is a single toggle, not a multi-phase pipeline.',
     screenshots: [],
   },
   {
-    featureId: 'custom-discussion-workflows',
+    featureId: 'custom-deterministic-workflows',
     support: 'no',
     note: 'Claude Code Desktop offers no mechanism to define or customize discussion workflows. This is a CLI-level feature and is not surfaced in the Desktop UI.',
     screenshots: [],
@@ -537,4 +518,12 @@ export const LATEST_KNOWN_FEATURES: FeatureSupport[] = [
       },
     ],
   },
+  { featureId: 'in-app-voice-input', support: 'unknown', screenshots: [] },
+  { featureId: 'web-preview-annotation', support: 'unknown', screenshots: [] },
+  { featureId: 'web-preview-element-inspector', support: 'unknown', screenshots: [] },
+  { featureId: 'local-target-branch-merge', support: 'unknown', screenshots: [] },
+  { featureId: 'llm-assisted-merge-rebase', support: 'unknown', screenshots: [] },
+  { featureId: 'chat-message-stacking', support: 'unknown', screenshots: [] },
+  { featureId: 'multi-repository-view', support: 'unknown', screenshots: [] },
+  { featureId: 'multi-repository-chat-targeting', support: 'unknown', screenshots: [] },
 ];
