@@ -1640,6 +1640,24 @@ const featureCount = visibleFeatures.length;
         .forEach((node) => {
           node.textContent = String(visibleTools.size);
         });
+      // Sync each select's value to the version of its own column. Some browsers
+      // fail to visually render the correct selected option when a <select>'s
+      // parent transitions from display:none to visible — showing the first
+      // option instead of the HTML-designated selected one. Setting select.value
+      // explicitly here ensures the visible dropdown always matches its column.
+      document
+        .querySelectorAll<HTMLSelectElement>('.tool__version--switcher')
+        .forEach((select) => {
+          const parentEl = select.closest<HTMLElement>('[data-preview-key]');
+          if (!parentEl) return;
+          const key = parentEl.dataset.previewKey;
+          const toolId = parentEl.dataset.toolId;
+          if (!key || !toolId) return;
+          const columnVersion = key.slice(toolId.length + 1);
+          if (select.value !== columnVersion) {
+            select.value = columnVersion;
+          }
+        });
     }
 
     apply();
