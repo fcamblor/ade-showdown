@@ -29,7 +29,13 @@ export const LATEST_KNOWN_FEATURES: FeatureSupport[] = [
     featureId: 'cloud-execution',
     support: 'yes',
     note: 'Environment selector in the prompt area exposes a Remote option that runs the session on Anthropic-hosted cloud; sessions continue even after closing the app. SSH sessions are an additional remote option.',
-    screenshots: [],
+    screenshots: [
+      {
+        src: '/screenshots/claude-code-desktop/cloud-execution_20260521_1.png',
+        alt: 'Claude Code Desktop environment selector dropdown showing Local (checked), Cloud > Default, Remote Control, and SSH sections.',
+        caption: 'Environment selector dropdown with the Cloud > Default option highlighted, allowing sessions to run on Anthropic-hosted infrastructure.',
+      },
+    ],
     sourceUrl: 'https://code.claude.com/docs/en/desktop',
     sourceExtract:
       'Environment: choose where Claude runs. Select Local for your machine, Remote for Anthropic-hosted cloud sessions, or an SSH connection for a remote machine you manage. […] Remote sessions run on Anthropic\'s cloud infrastructure and continue even if you close the app or shut down your computer.',
@@ -37,7 +43,13 @@ export const LATEST_KNOWN_FEATURES: FeatureSupport[] = [
   {
     featureId: 'local-execution',
     support: 'yes',
-    screenshots: [],
+    screenshots: [
+      {
+        src: '/screenshots/claude-code-desktop/local-execution_20260521_1.png',
+        alt: 'Claude Code Desktop environment selector dropdown showing Local option checked at the top.',
+        caption: 'Environment selector dropdown with the Local option selected (checkmark), running Claude Code on the local machine.',
+      },
+    ],
     sourceUrl: 'https://code.claude.com/docs/en/overview',
     sourceExtract:
       'Claude Code is an agentic coding tool that reads your codebase, edits files, runs commands, and integrates with your development tools. Available in your terminal, IDE, desktop app, and browser.',
@@ -45,7 +57,7 @@ export const LATEST_KNOWN_FEATURES: FeatureSupport[] = [
   {
     featureId: 'multiple-model-families',
     support: 'no',
-    note: 'Single vendor: Anthropic Claude models only (Opus/Sonnet/Haiku). Reachable through several gateways (Anthropic API, Bedrock, Vertex AI, Foundry) but all serve the same vendor — no support for OpenAI, Google, xAI or other model families.',
+    note: 'Claude-only support (Opus/Sonnet/Haiku). Multiple gateways possible (Anthropic API, Bedrock, Vertex AI, Foundry) but still a single vendor. Unofficial env-var hacks exist for non-Anthropic models, but OpenAI/Google/xAI support is not officially supported.',
     screenshots: [],
     sourceUrl: 'https://code.claude.com/docs/en/model-config',
     sourceExtract:
@@ -54,8 +66,19 @@ export const LATEST_KNOWN_FEATURES: FeatureSupport[] = [
   {
     featureId: 'pr-creation',
     support: 'yes',
-    note: 'Desktop creates the PR via the GitHub CLI (`gh`) and then surfaces a dedicated CI status bar inside the session with Auto-fix and Auto-merge toggles.',
-    screenshots: [],
+    note: 'Creates the PR via the /create-pr embedded command, which is going to ask you if you want to create a draft/ready-to-review PR.',
+    screenshots: [
+      {
+        src: '/screenshots/claude-code-desktop/pr-creation_20260521_1.png',
+        alt: 'TODO',
+        caption: 'TODO',
+      },
+      {
+        src: '/screenshots/claude-code-desktop/pr-creation_20260521_2.png',
+        alt: 'TODO',
+        caption: 'TODO',
+      },
+    ],
     sourceUrl: 'https://code.claude.com/docs/en/desktop',
     sourceExtract:
       'After you open a pull request, a CI status bar appears in the session. Claude Code uses the GitHub CLI to poll check results and surface failures. […] PR monitoring requires the GitHub CLI (`gh`) to be installed and authenticated on your machine.',
@@ -72,8 +95,14 @@ export const LATEST_KNOWN_FEATURES: FeatureSupport[] = [
   {
     featureId: 'live-logs',
     support: 'yes',
-    note: 'Each session streams tool calls, file edits and intermediate steps live in the chat transcript; a Verbose view mode exposes every step.',
-    screenshots: [],
+    note: 'Each session streams tool calls, file edits and intermediate steps live in the chat transcript; a Verbose view mode exposes every step. Logs for each session are also available as jsonl files under `~/.claude/projects/<project-path>/`.',
+    screenshots: [
+      {
+        src: '/screenshots/claude-code-desktop/live-logs_20260521_1.png',
+        alt: 'Claude Code Desktop transcript view menu open with Normal, Thinking, Verbose, and Summary options; Verbose is highlighted.',
+        caption: 'Transcript view menu showing the Verbose mode option, which exposes every tool call, file read, and intermediate step.',
+      },
+    ],
     sourceUrl: 'https://code.claude.com/docs/en/desktop',
     sourceExtract:
       'View modes control how much detail appears in the chat transcript. […] Verbose — Every tool call, file read, and intermediate step Claude takes.',
@@ -82,7 +111,13 @@ export const LATEST_KNOWN_FEATURES: FeatureSupport[] = [
     featureId: 'diff-viewer',
     support: 'yes',
     note: 'Desktop app diff viewer shows changes file by file before creating a pull request.',
-    screenshots: [],
+    screenshots: [
+      {
+        src: '/screenshots/claude-code-desktop/diff-viewer_20260521_1.png',
+        alt: 'TODO',
+        caption: 'TODO',
+      },
+    ],
     sourceUrl: 'https://code.claude.com/docs/en/desktop',
     sourceExtract:
       'After Claude makes changes to your code, the diff view lets you review modifications file by file before creating a pull request.',
@@ -90,7 +125,7 @@ export const LATEST_KNOWN_FEATURES: FeatureSupport[] = [
   {
     featureId: 'diff-whitespace-toggle',
     support: 'no',
-    note: 'No ignore-whitespace toggle documented in the desktop diff viewer.',
+    note: 'No ignore-whitespace toggle documented in the diff viewer.',
     screenshots: [],
   },
   {
@@ -128,17 +163,23 @@ export const LATEST_KNOWN_FEATURES: FeatureSupport[] = [
   },
   {
     featureId: 'no-worktree-mode',
-    support: 'no',
-    note: 'For Git repositories the Code tab always allocates a per-session worktree under `.claude/worktrees/`; there is no Desktop switch to run a session directly against the original checkout.',
-    screenshots: [],
+    support: 'yes',
+    note: 'The session toolbar exposes a "worktree" toggle that can be unchecked to run the session directly against the original checkout without allocating a git worktree.',
+    screenshots: [
+      {
+        src: '/screenshots/claude-code-desktop/no-worktree-mode_20260521_1.png',
+        alt: 'Claude Code Desktop session toolbar at the bottom showing the worktree toggle unchecked (disabled).',
+        caption: 'Session toolbar with the worktree toggle unchecked, running the session directly on the main checkout instead of a dedicated worktree.',
+      },
+    ],
     sourceUrl: 'https://code.claude.com/docs/en/desktop',
     sourceExtract:
-      'For Git repositories, each session gets its own isolated copy of your project using Git worktrees, so changes in one session don’t affect other sessions until you commit them.',
+      "For Git repositories, each session gets its own isolated copy of your project using Git worktrees, so changes in one session don't affect other sessions until you commit them.",
   },
   {
     featureId: 'workflow-shell-hooks',
-    support: 'yes',
-    note: 'Hooks declared in `~/.claude/settings.json` or `.claude/settings.json` apply to Desktop sessions and include lifecycle events such as SessionStart/SessionEnd, PreToolUse, PostToolUse, WorktreeCreate, WorktreeRemove, Stop and Notification.',
+    support: 'no',
+    note: 'Claude Code hooks (PreToolUse, PostToolUse, Stop, etc.) react to tool/conversation events only. No Desktop-level lifecycle hooks exist (e.g. worktree init), and the UI provides no custom orchestration/workflow hook system.',
     screenshots: [],
     sourceUrl: 'https://code.claude.com/docs/en/hooks',
     sourceExtract:
@@ -146,8 +187,8 @@ export const LATEST_KNOWN_FEATURES: FeatureSupport[] = [
   },
   {
     featureId: 'run-configurations',
-    support: 'partial',
-    note: 'Desktop app reads `.claude/launch.json` to launch dev servers (name, command, args, port); not arbitrary UI-defined run buttons.',
+    support: 'no',
+    note: 'Only web preview is supported through .claude/launch.json, but specific configurations cannot be triggered directly from the UI',
     screenshots: [],
     sourceUrl: 'https://code.claude.com/docs/en/desktop',
     sourceExtract:
@@ -175,7 +216,18 @@ export const LATEST_KNOWN_FEATURES: FeatureSupport[] = [
     featureId: 'diff-comments',
     support: 'yes',
     note: 'Click any line in the desktop diff to add a comment; Claude reads the comments and revises.',
-    screenshots: [],
+    screenshots: [
+      {
+        src: '/screenshots/claude-code-desktop/diff-comments_20260521_1.png',
+        alt: 'TODO',
+        caption: 'TODO',
+      },
+      {
+        src: '/screenshots/claude-code-desktop/diff-comments_20260521_2.png',
+        alt: 'TODO',
+        caption: 'TODO',
+      },
+    ],
     sourceUrl: 'https://code.claude.com/docs/en/desktop',
     sourceExtract:
       'To comment on specific lines, click any line in the diff to open a comment box. Type your feedback and press Enter to add the comment. Claude reads your comments and makes the requested changes, which appear as a new diff you can review.',
@@ -190,7 +242,13 @@ export const LATEST_KNOWN_FEATURES: FeatureSupport[] = [
     featureId: 'terminal-in-worktree',
     support: 'yes',
     note: "Desktop app has an integrated terminal pane rooted in the session's working directory.",
-    screenshots: [],
+    screenshots: [
+      {
+        src: '/screenshots/claude-code-desktop/terminal-in-worktree_20260521_1.png',
+        alt: "Claude Code Desktop panel selector dropdown showing Terminal option checked, with an integrated terminal pane open on the right side of the session.",
+        caption: "Panel selector with Terminal selected (checkmark), showing the integrated terminal open alongside the chat transcript, rooted in the session's worktree directory.",
+      },
+    ],
     sourceUrl: 'https://code.claude.com/docs/en/desktop',
     sourceExtract:
       "The integrated terminal lets you run commands alongside your session without switching to another app. The terminal opens in your session's working directory and shares the same environment as Claude, so commands like `npm test` or `git status` see the same files Claude is editing.",
@@ -199,16 +257,28 @@ export const LATEST_KNOWN_FEATURES: FeatureSupport[] = [
     featureId: 'open-in-ide',
     support: 'partial',
     note: 'Right-click "Open in" on a file path and the "Continue in" menu on the toolbar both open a fixed list of installed editors (VS Code, Cursor, Zed…); no user-defined custom external apps.',
-    screenshots: [],
+    screenshots: [
+      {
+        src: '/screenshots/claude-code-desktop/open-in-ide_20260521_1.png',
+        alt: 'Claude Code Desktop session context menu showing "Open in" submenu with VS Code, Windsurf, Zed, and Finder options.',
+        caption: 'Session context menu with the "Open in" submenu expanded, listing installed editors (VS Code, Windsurf, Zed) and Finder.',
+      },
+    ],
     sourceUrl: 'https://code.claude.com/docs/en/desktop',
     sourceExtract:
       'Right-click any file path in the chat, diff viewer, or file pane to open a context menu: […] Open in: open the file in an installed editor such as VS Code, Cursor, or Zed. […] The Continue in menu […] lets you move your session to another surface: […] Your IDE: opens your project in a supported IDE at the current working directory.',
   },
   {
     featureId: 'file-tree-browser',
-    support: 'partial',
-    note: 'Diff viewer exposes a list of changed files; no full project file-tree browser documented (the file pane opens individual files).',
-    screenshots: [],
+    support: 'yes',
+    note: 'The Files panel exposes a full project file-tree browser that lets you navigate and open any file in the project.',
+    screenshots: [
+      {
+        src: '/screenshots/claude-code-desktop/file-tree-browser_20260521_1.png',
+        alt: 'Claude Code Desktop Files panel on the right showing a project file tree with top-level entries like agents, .claude, public, src, .gitignore, and config files.',
+        caption: 'Files panel open alongside the session, displaying the full project file tree for browsing and opening files.',
+      },
+    ],
     sourceUrl: 'https://code.claude.com/docs/en/desktop',
     sourceExtract: 'Click a file path in the chat or diff viewer to open it in the file pane.',
   },
@@ -216,7 +286,13 @@ export const LATEST_KNOWN_FEATURES: FeatureSupport[] = [
     featureId: 'inline-file-editing',
     support: 'yes',
     note: 'Desktop file pane supports spot edits with Save, with stale-file detection.',
-    screenshots: [],
+    screenshots: [
+      {
+        src: '/screenshots/claude-code-desktop/inline-file-editing_20260521_1.png',
+        alt: 'Claude Code Desktop with the Files panel open showing the project tree on the right, and a file editor pane below it displaying tsconfig.json content.',
+        caption: 'File pane showing the content of tsconfig.json opened from the file tree, editable directly in the Desktop interface.',
+      },
+    ],
     sourceUrl: 'https://code.claude.com/docs/en/desktop',
     sourceExtract:
       'Click a file path in the chat or diff viewer to open it in the file pane. Make spot edits and click Save to write them back. If the file changed on disk since you opened it, the pane warns you and lets you override or discard.',
@@ -275,7 +351,13 @@ export const LATEST_KNOWN_FEATURES: FeatureSupport[] = [
     featureId: 'context-fill-indicator',
     support: 'yes',
     note: 'Prompt box shows context-window usage; `/compact` and auto-compaction kick in when full.',
-    screenshots: [],
+    screenshots: [
+      {
+        src: '/screenshots/claude-code-desktop/context-fill-indicator_20260521_1.png',
+        alt: 'TODO',
+        caption: 'TODO',
+      },
+    ],
     sourceUrl: 'https://code.claude.com/docs/en/vs-code',
     sourceExtract:
       "Context indicator: the prompt box shows how much of Claude's context window you're using. Claude automatically compacts when needed, or you can run `/compact` manually.",
@@ -284,7 +366,13 @@ export const LATEST_KNOWN_FEATURES: FeatureSupport[] = [
     featureId: 'switch-model-mid-session',
     support: 'yes',
     note: 'Model dropdown next to the send button (Cmd+Shift+I) swaps the Anthropic model mid-session; the selection persists.',
-    screenshots: [],
+    screenshots: [
+      {
+        src: '/screenshots/claude-code-desktop/switch-model-mid-session_20260521_1.png',
+        alt: 'TODO',
+        caption: 'TODO',
+      },
+    ],
     sourceUrl: 'https://code.claude.com/docs/en/desktop',
     sourceExtract:
       'Model: pick a model from the dropdown next to the send button. You can change this during the session.',
@@ -293,15 +381,37 @@ export const LATEST_KNOWN_FEATURES: FeatureSupport[] = [
     featureId: 'model-effort-support',
     support: 'yes',
     note: 'Effort menu reachable via Cmd+Shift+E lets the user pick adaptive reasoning levels (`low`, `medium`, `high`, `xhigh`, `max`).',
-    screenshots: [],
+    screenshots: [
+      {
+        src: '/screenshots/claude-code-desktop/model-effort-support_20260521_1.png',
+        alt: 'TODO',
+        caption: 'TODO',
+      },
+    ],
     sourceUrl: 'https://code.claude.com/docs/en/desktop',
     sourceExtract: 'Cmd Shift E — Open effort menu',
   },
   {
     featureId: 'web-preview',
     support: 'yes',
-    note: 'Desktop preview pane embeds a browser bound to `launch.json` dev servers; Claude can drive it (start dev server, hit API endpoints) and read server logs, fulfilling the "full" criterion (orchestrator can both display and act on the preview).',
-    screenshots: [],
+    note: 'Desktop preview pane embeds a browser bound to `launch.json` dev servers; Claude can drive it (start dev server, hit API endpoints), read server logs, both display and act on the preview. User can annotate some area or copy/paste element DOM selector in the chat.',
+    screenshots: [
+      {
+        src: '/screenshots/claude-code-desktop/web-preview_20260521_1.png',
+        alt: 'TODO',
+        caption: 'TODO',
+      },
+      {
+        src: '/screenshots/claude-code-desktop/web-preview_20260521_2.png',
+        alt: 'TODO',
+        caption: 'TODO',
+      },
+      {
+        src: '/screenshots/claude-code-desktop/web-preview_20260521_3.png',
+        alt: 'TODO',
+        caption: 'TODO',
+      },
+    ],
     sourceUrl: 'https://code.claude.com/docs/en/desktop',
     sourceExtract:
       'Claude can start a dev server and open an embedded browser to verify its changes. This works for frontend web apps as well as backend servers: Claude can test API endpoints, view server logs, and iterate on issues it finds.',
@@ -319,7 +429,13 @@ export const LATEST_KNOWN_FEATURES: FeatureSupport[] = [
     featureId: 'quick-chat',
     support: 'yes',
     note: 'The Desktop app ships two repo-less tabs alongside Code: Chat (standard Claude conversations) and Cowork (Dispatch-style agentic work), both detached from any worktree.',
-    screenshots: [],
+    screenshots: [
+      {
+        src: '/screenshots/claude-code-desktop/quick-chat_20260521_1.png',
+        alt: 'TODO',
+        caption: 'TODO',
+      },
+    ],
     sourceUrl: 'https://code.claude.com/docs/en/desktop',
     sourceExtract:
       'The Claude Desktop app has three tabs: Chat for conversations, Cowork for Dispatch and longer agentic work, and Code for software development.',
@@ -355,7 +471,13 @@ export const LATEST_KNOWN_FEATURES: FeatureSupport[] = [
     featureId: 'chat-rewind',
     support: 'yes',
     note: '`/rewind` (or Esc Esc) rewinds the conversation and/or file edits to an earlier checkpoint, including the workspace state.',
-    screenshots: [],
+    screenshots: [
+      {
+        src: '/screenshots/claude-code-desktop/chat-rewind_20260521_1.png',
+        alt: 'TODO',
+        caption: 'TODO',
+      },
+    ],
     sourceUrl: 'https://code.claude.com/docs/en/checkpointing',
     sourceExtract:
       'Use `/rewind` (or press Escape twice) to restore your conversation, code, or both to an earlier checkpoint. Choose to rewind just the conversation, just the file changes, or both together.',
@@ -388,7 +510,18 @@ export const LATEST_KNOWN_FEATURES: FeatureSupport[] = [
     featureId: 'fork-workspace',
     support: 'no',
     note: 'The "Continue in" menu can hand a session off to the web or an IDE, but the Code tab exposes no one-click action that clones an existing session + worktree state into a brand-new worktree. (`--fork-session` exists in the CLI only.)',
-    screenshots: [],
+    screenshots: [
+      {
+        src: '/screenshots/claude-code-desktop/fork-workspace_20260521_1.png',
+        alt: 'TODO',
+        caption: 'TODO',
+      },
+      {
+        src: '/screenshots/claude-code-desktop/fork-workspace_20260521_2.png',
+        alt: 'TODO',
+        caption: 'TODO',
+      },
+    ],
     sourceUrl: 'https://code.claude.com/docs/en/desktop',
     sourceExtract:
       'The Continue in menu, accessible from the VS Code icon in the bottom right of the session toolbar, lets you move your session to another surface.',
