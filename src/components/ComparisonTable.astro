@@ -17,6 +17,11 @@ const defaultVersionFor = (toolId: string) => {
   const versions = ORCHESTRATORS_BY_TOOL[toolId];
   return versions.find(isDefaultVisible)?.version ?? versions[0]?.version ?? '';
 };
+const latestReviewedLabel = 'latest reviewed';
+const latestReviewedTitle =
+  'Latest version analyzed/reviewed in this comparison; not necessarily the newest release available today.';
+const versionTitleFor = (o: typeof ORCHESTRATORS[number], details?: string) =>
+  [isDefaultVisible(o) ? latestReviewedTitle : null, details].filter(Boolean).join(' ');
 
 const trackingKindLabel: Record<TrackingSourceKind, string> = {
   'release-notes': 'Release notes',
@@ -220,6 +225,7 @@ const featureCount = visibleFeatures.length;
               const versionTooltip = vd
                 ? [vd.buildHash && `(${vd.buildHash})`, vd.buildDate].filter(Boolean).join(' ')
                 : undefined;
+              const currentVersionTitle = versionTitleFor(o, versionTooltip);
               const toolVersions = ORCHESTRATORS_BY_TOOL[o.toolId];
               const defaultVersion = defaultVersionFor(o.toolId);
               // Dropdown lists every version of the tool; pending options carry
@@ -311,7 +317,7 @@ const featureCount = visibleFeatures.length;
                           data-tool-id={o.toolId}
                           data-default-version={defaultVersion}
                           aria-label={`Switch displayed version of ${o.toolName}`}
-                          title={versionTooltip}
+                          title={currentVersionTitle}
                         >
                           {dropdownVersions.map((v) => (
                             <option
@@ -320,7 +326,7 @@ const featureCount = visibleFeatures.length;
                               data-pending={!isApproved(v) ? 'true' : null}
                             >
                               v{v.version}
-                              {v.version === defaultVersion ? ' · latest' : ''}
+                              {v.version === defaultVersion ? ` · ${latestReviewedLabel}` : ''}
                               {!isApproved(v) ? ' · preview' : ''}
                             </option>
                           ))}
@@ -331,20 +337,20 @@ const featureCount = visibleFeatures.length;
                             unlocked) — keeps a useless 1-option select from
                             hinting at hidden previews. */}
                         <span
-                          class={`tool__version tool__version--fallback${versionTooltip ? ' tool__version--has-tooltip' : ''}`}
-                          title={versionTooltip}
+                          class={`tool__version tool__version--fallback${currentVersionTitle ? ' tool__version--has-tooltip' : ''}`}
+                          title={currentVersionTitle}
                           hidden
                         >
-                          v{o.version}{isDefaultVisible(o) ? ' · latest' : ''}{!isApproved(o) ? ' · preview' : ''}
+                          v{o.version}{isDefaultVisible(o) ? ` · ${latestReviewedLabel}` : ''}{!isApproved(o) ? ' · preview' : ''}
                         </span>
                       </>
-                    ) : versionTooltip ? (
-                      <span class="tool__version tool__version--has-tooltip" title={versionTooltip}>
-                        v{o.version}{isDefaultVisible(o) ? ' · latest' : ''}{!isApproved(o) ? ' · preview' : ''}
+                    ) : currentVersionTitle ? (
+                      <span class="tool__version tool__version--has-tooltip" title={currentVersionTitle}>
+                        v{o.version}{isDefaultVisible(o) ? ` · ${latestReviewedLabel}` : ''}{!isApproved(o) ? ' · preview' : ''}
                       </span>
                     ) : (
                       <span class="tool__version">
-                        v{o.version}{isDefaultVisible(o) ? ' · latest' : ''}{!isApproved(o) ? ' · preview' : ''}
+                        v{o.version}{isDefaultVisible(o) ? ` · ${latestReviewedLabel}` : ''}{!isApproved(o) ? ' · preview' : ''}
                       </span>
                     )}
                     {o.releaseDate ? (
