@@ -1,0 +1,15 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "frontend",
+      "runtimeExecutable": "zsh",
+      "runtimeArgs": [
+        "-lc",
+        "set -e; mise trust -y >/dev/null 2>&1 || true; if [ ! -x node_modules/.bin/astro ]; then pnpm install; fi; PORT=\"${PORT:-4321}\" pnpm exec astro dev --host 0.0.0.0 --port \"$PORT\""
+      ],
+      "port": 4321,
+      "autoPort": true
+    }
+  ]
+}

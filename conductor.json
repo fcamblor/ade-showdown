@@ -1,0 +1,7 @@
+{
+  "scripts": {
+    "setup": "mkdir -p .claude\nln -sfn \"$CONDUCTOR_ROOT_PATH/.claude/settings.local.json\" .claude/settings.local.json\nmise trust\npnpm install",
+    "run": "PORT=\"$CONDUCTOR_PORT\" pnpm exec astro dev --host 0.0.0.0 --port \"$CONDUCTOR_PORT\""
+  },
+  "runScriptMode": "concurrent"
+}
