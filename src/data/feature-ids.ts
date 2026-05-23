@@ -18,6 +18,7 @@ export const FEATURE_IDS = [
   'diff-viewer',
   'diff-whitespace-toggle',
   'diff-multi-views',
+  'chat-turn-diff',
   'self-hosted',
   'sound-notifications',
   'multi-sessions-per-worktree',

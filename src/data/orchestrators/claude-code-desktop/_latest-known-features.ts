@@ -527,4 +527,13 @@ export const LATEST_KNOWN_FEATURES: FeatureSupport[] = [
   { featureId: 'chat-message-stacking', support: 'unknown', screenshots: [] },
   { featureId: 'multi-repository-view', support: 'unknown', screenshots: [] },
   { featureId: 'multi-repository-chat-targeting', support: 'unknown', screenshots: [] },
+  {
+    featureId: 'chat-turn-diff',
+    support: 'no',
+    note: 'A single session-wide diff stats indicator (e.g. `+12 -1`) opens the global diff viewer; no per-turn file list or per-turn diff scope exposed inside the chat transcript.',
+    screenshots: [],
+    sourceUrl: 'https://code.claude.com/docs/en/desktop',
+    sourceExtract:
+      'When Claude changes files, a diff stats indicator appears showing the number of lines added and removed, such as `+12 -1`. Click this indicator to open the diff viewer, which displays a file list on the left and the changes for each file on the right.',
+  },
 ];

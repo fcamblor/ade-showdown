@@ -99,9 +99,17 @@ const features: Feature[] = [
     id: 'diff-multi-views',
     label: 'Diff: multiple scopes / views',
     category: 'ux',
-    shortDescription: 'Switch the diff scope between several views (per-commit, latest LLM turn, uncommitted changes, workspace vs. target branch, …).',
+    shortDescription: 'Switch the diff scope between several views (per-commit, uncommitted changes, workspace vs. target branch, …).',
     longDescription:
-      'Beyond a single static diff, the orchestrator offers multiple selectable diff scopes — e.g. changes from a single commit, changes from the last LLM turn, currently uncommitted changes, or the cumulative diff against the target branch. "Partial" when only one alternative scope is available, "yes" when several are.',
+      'Beyond a single static diff, the orchestrator offers multiple selectable diff scopes — e.g. changes from a single commit, currently uncommitted changes, or the cumulative diff against the target branch. "Partial" when only one alternative scope is available, "yes" when several are. Per-turn diffs surfaced inside the chat are tracked separately by the `chat-turn-diff` row.',
+  },
+  {
+    id: 'chat-turn-diff',
+    label: 'Per-turn diff in chat',
+    category: 'ux',
+    shortDescription: 'Show the code changes produced by an individual LLM turn directly from the chat surface, with no manual commit needed.',
+    longDescription:
+      'From within the chat, each LLM turn exposes the diff it produced — typically as a footer listing the files it touched, or a click-through to a per-turn scope of the diff viewer. This lets the user review what a given turn changed without manually committing after each turn just to delimit the diff. Distinct from `diff-multi-views`, which tracks whether the diff viewer itself offers several scopes to pick from.',
   },
   {
     id: 'self-hosted',

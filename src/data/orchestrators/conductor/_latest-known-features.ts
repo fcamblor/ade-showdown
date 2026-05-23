@@ -151,12 +151,21 @@ export const LATEST_KNOWN_FEATURES: FeatureSupport[] = [
         alt: 'Diff Viewer showing a single commit’s changes via the per-commit selector',
       },
       {
-        src: '/screenshots/conductor/diff-multi-views_turn-changes_20260518_1.png',
-        alt: 'Chat turn footer listing the files changed by a single agent turn, each acting as a shortcut to its diff',
-      },
-      {
         src: '/screenshots/conductor/diff-multi-views_turn-changes_20260518_2.png',
         alt: 'Diff Viewer in "Latest turn" mode showing only the changes produced by the most recent agent discussion',
+      },
+    ],
+    sourceUrl: 'https://www.conductor.build/docs/reference/diff-viewer',
+    sourceExtract: 'The Diff Viewer shows the code changes in a workspace.',
+  },
+  {
+    featureId: 'chat-turn-diff',
+    support: 'yes',
+    note: 'Each agent turn exposes a footer listing the files it changed; clicking a file jumps straight to its diff scoped to that turn — no manual commit needed to delimit the per-turn diff.',
+    screenshots: [
+      {
+        src: '/screenshots/conductor/diff-multi-views_turn-changes_20260518_1.png',
+        alt: 'Chat turn footer listing the files changed by a single agent turn, each acting as a shortcut to its diff',
       },
     ],
     sourceUrl: 'https://www.conductor.build/docs/reference/diff-viewer',
