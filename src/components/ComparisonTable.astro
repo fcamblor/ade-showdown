@@ -3,7 +3,7 @@ import { FEATURES, ORCHESTRATORS, ORCHESTRATORS_BY_TOOL, isApproved, isDefaultVi
 import type { SupportLevel, FeatureCategory, Feature, Platform, TrackingSourceKind, ModelIntegrationKind } from '../data/schema';
 import Evidence from './Evidence.astro';
 import ComparisonRankings from './ComparisonRankings.svelte';
-import FeatureRatingSummary from './FeatureRatingSummary.svelte';
+import FeatureRatingSummaries from './FeatureRatingSummaries.svelte';
 import { getRankingTools } from '../lib/static-comparison';
 
 // Each orchestrator column carries a stable `<toolId>@<version>` key. The
@@ -619,7 +619,7 @@ const rankingTools = getRankingTools();
                     <div class="feature">
                       <p class="feature__label">{feature.label}</p>
                       <p class="feature__body">{feature.longDescription ?? feature.shortDescription}</p>
-                      <FeatureRatingSummary featureId={feature.id} client:visible />
+                      <div class="feature-rating-slot" data-feature-id={feature.id}></div>
                     </div>
                   </th>
                   {ORCHESTRATORS.map((orch, i) => {
@@ -695,6 +695,12 @@ const rankingTools = getRankingTools();
       ))}
     </ul>
   </section>
+
+  {/* Single hydration island that fills in every `.feature-rating-slot` above.
+      Used to be one client:visible Svelte island per feature row (~56 of
+      them), each with its own IntersectionObserver + Supabase auth
+      subscription. */}
+  <FeatureRatingSummaries client:idle />
 </section>
 
 <style>
