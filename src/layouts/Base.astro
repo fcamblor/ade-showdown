@@ -5,12 +5,32 @@ import { RATABLE_FEATURES } from '../lib/ratable-features';
 
 interface Props {
   title?: string;
+  description?: string;
+  image?: string;
+  imageAlt?: string;
 }
-const { title = 'ADE Arena — ADE & coding-agent orchestrators compared' } = Astro.props;
+
+const DEFAULT_TITLE = 'ADE Arena — ADE & coding-agent orchestrators compared';
+const DEFAULT_DESCRIPTION =
+  'Side-by-side comparison of Agentic Development Environments (ADE) and coding-agent orchestrators — Conductor, Vibe Kanban, Claude Code Desktop, T3 Code and more.';
+
+const {
+  title = DEFAULT_TITLE,
+  description = DEFAULT_DESCRIPTION,
+  image = '/og-image.png',
+  imageAlt = 'ADE Arena — Agentic Dev Environments & orchestrators, scored side by side.',
+} = Astro.props;
 
 const pathname = Astro.url.pathname.replace(/\/$/, '') || '/';
 const isCompareActive = pathname === '/' || pathname.startsWith('/compare');
 const isRateActive = pathname.startsWith('/rate');
+
+// `Astro.site` is configured in astro.config.mjs and gives an absolute URL
+// for canonical / og:url. Falls back to the request URL in dev where
+// Astro.site is set but the local port differs — that's fine, social
+// crawlers only hit production.
+const canonicalUrl = new URL(pathname, Astro.site ?? Astro.url).toString();
+const absoluteImage = new URL(image, Astro.site ?? Astro.url).toString();
 ---
 <!DOCTYPE html>
 <html lang="en">
@@ -18,10 +38,37 @@ const isRateActive = pathname.startsWith('/rate');
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>{title}</title>
-    <meta
-      name="description"
-      content="Side-by-side comparison of Agentic Development Environments (ADE) and coding-agent orchestrators — Conductor, Vibe Kanban, Claude Code Desktop, t3.codes and more."
-    />
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonicalUrl} />
+
+    <!-- Icons / PWA manifest -->
+    <link rel="icon" href="/favicon.ico" sizes="any" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
+    <meta name="theme-color" content="#140807" />
+
+    <!-- Open Graph (shared previews on Slack, LinkedIn, Discord, iMessage…) -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="ADE Arena" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonicalUrl} />
+    <meta property="og:image" content={absoluteImage} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content={imageAlt} />
+    <meta property="og:locale" content="en_US" />
+
+    <!-- Twitter / X card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:site" content="@fcamblor" />
+    <meta name="twitter:creator" content="@fcamblor" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={absoluteImage} />
+    <meta name="twitter:image:alt" content={imageAlt} />
+
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -35,9 +82,21 @@ const isRateActive = pathname.startsWith('/rate');
       <div class="site-header__inner">
         <div class="brand">
           <p class="brand__kicker">
-            <span class="brand__mark">ADE&nbsp;Arena</span>
-            <span class="brand__sep" aria-hidden="true">/</span>
-            <span>{new Date().getFullYear()} edition</span>
+            <span class="brand__mark">
+              <svg class="brand__icon" viewBox="0 0 64 64" aria-hidden="true">
+                <line x1="32" y1="2" x2="32" y2="8" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" />
+                <circle cx="32" cy="3.5" r="2" fill="currentColor" />
+                <rect x="6" y="10" width="52" height="44" rx="10" fill="none" stroke="currentColor" stroke-width="3" />
+                <g stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none">
+                  <line x1="12" y1="36" x2="18" y2="24" />
+                  <polyline points="22,24 27,30 22,36" />
+                  <polyline points="42,24 37,30 42,36" />
+                  <line x1="46" y1="36" x2="52" y2="24" />
+                </g>
+                <text x="32" y="50" text-anchor="middle" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" font-size="10" font-weight="700" font-style="italic" fill="currentColor">vs</text>
+              </svg>
+              <span>ADE&nbsp;Arena</span>
+            </span>
           </p>
           <h1 class="brand__title">
             Agentic Dev Environments &amp; orchestrators,<br />scored side by side.
@@ -212,26 +271,35 @@ const isRateActive = pathname.startsWith('/rate');
       }
       .brand { flex: 1 1 auto; min-width: 0; }
       .brand__kicker {
-        margin: 0 0 var(--s-3);
+        margin: 0 0 var(--s-4);
         display: inline-flex;
-        align-items: baseline;
-        gap: var(--s-2);
+        align-items: center;
         font-family: var(--font-display);
         font-weight: 700;
         letter-spacing: 0.16em;
         text-transform: uppercase;
-        font-size: 0.78rem;
+        font-size: clamp(1rem, 1.6vw, 1.25rem);
         color: var(--fg-muted);
       }
       .brand__mark {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
         color: var(--accent);
         letter-spacing: 0.18em;
         border: 1px solid color-mix(in oklch, var(--accent) 50%, transparent);
-        padding: 4px var(--s-2) 3px;
-        border-radius: var(--radius-sm);
+        padding: 8px 14px 7px;
+        border-radius: var(--radius-md);
         background: color-mix(in oklch, var(--accent) 10%, transparent);
       }
-      .brand__sep { color: var(--fg-faint); padding: 0 2px; }
+      .brand__icon {
+        width: 1.4em;
+        height: 1.4em;
+        flex-shrink: 0;
+        /* Nudge the icon down a hair so its visual centre lines up with the
+           x-height of the uppercase label text. */
+        transform: translateY(0.04em);
+      }
       .brand__title {
         margin: 0;
         font-family: var(--font-display);
