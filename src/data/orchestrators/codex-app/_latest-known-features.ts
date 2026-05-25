@@ -359,4 +359,6 @@ export const LATEST_KNOWN_FEATURES: FeatureSupport[] = [
   { featureId: 'chat-message-stacking', support: 'unknown', screenshots: [] },
   { featureId: 'multi-repository-view', support: 'unknown', screenshots: [] },
   { featureId: 'multi-repository-chat-targeting', support: 'unknown', screenshots: [] },
+  { featureId: 'chat-turn-diff', support: 'unknown', screenshots: [] },
+  { featureId: 'unarchive-worktree', support: 'unknown', screenshots: [] },
 ];
