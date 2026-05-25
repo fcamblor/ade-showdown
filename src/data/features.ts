@@ -99,9 +99,17 @@ const features: Feature[] = [
     id: 'diff-multi-views',
     label: 'Diff: multiple scopes / views',
     category: 'ux',
-    shortDescription: 'Switch the diff scope between several views (per-commit, latest LLM turn, uncommitted changes, workspace vs. target branch, …).',
+    shortDescription: 'Switch the diff scope between several views (per-commit, uncommitted changes, workspace vs. target branch, …).',
     longDescription:
-      'Beyond a single static diff, the orchestrator offers multiple selectable diff scopes — e.g. changes from a single commit, changes from the last LLM turn, currently uncommitted changes, or the cumulative diff against the target branch. "Partial" when only one alternative scope is available, "yes" when several are.',
+      'Beyond a single static diff, the orchestrator offers multiple selectable diff scopes — e.g. changes from a single commit, currently uncommitted changes, or the cumulative diff against the target branch. "Partial" when only one alternative scope is available, "yes" when several are. Per-turn diffs surfaced inside the chat are tracked separately by the `chat-turn-diff` row.',
+  },
+  {
+    id: 'chat-turn-diff',
+    label: 'Per-turn diff in chat',
+    category: 'ux',
+    shortDescription: 'Show the code changes produced by an individual LLM turn directly from the chat surface, with no manual commit needed.',
+    longDescription:
+      'From within the chat, each LLM turn exposes the diff it produced — typically as a footer listing the files it touched, or a click-through to a per-turn scope of the diff viewer. This lets the user review what a given turn changed without manually committing after each turn just to delimit the diff. Distinct from `diff-multi-views`, which tracks whether the diff viewer itself offers several scopes to pick from.',
   },
   {
     id: 'self-hosted',
@@ -379,6 +387,14 @@ const features: Feature[] = [
     shortDescription: 'Clone the current workspace (worktree state + session history) into a new worktree to branch off explorations.',
     longDescription:
       'Fork the entire state of a workspace — git worktree contents, session/chat history, and any local-only files — into a brand-new worktree, so you can branch off an alternative exploration without disturbing the original session.',
+  },
+  {
+    id: 'unarchive-worktree',
+    label: 'Unarchive a worktree',
+    category: 'workflow',
+    shortDescription: 'Restore an archived worktree back to the active list so its session, files and history can be resumed.',
+    longDescription:
+      'After a worktree has been archived — manually or automatically (e.g. on PR merge) — the orchestrator exposes an action to bring it back as an active workspace, preserving its session/chat history and git state. "Partial" when only the metadata is restored (no underlying worktree/state), "yes" when the restored workspace is fully resumable.',
   },
   {
     id: 'in-app-voice-input',

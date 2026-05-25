@@ -151,12 +151,21 @@ export const LATEST_KNOWN_FEATURES: FeatureSupport[] = [
         alt: 'Diff Viewer showing a single commit’s changes via the per-commit selector',
       },
       {
-        src: '/screenshots/conductor/diff-multi-views_turn-changes_20260518_1.png',
-        alt: 'Chat turn footer listing the files changed by a single agent turn, each acting as a shortcut to its diff',
-      },
-      {
         src: '/screenshots/conductor/diff-multi-views_turn-changes_20260518_2.png',
         alt: 'Diff Viewer in "Latest turn" mode showing only the changes produced by the most recent agent discussion',
+      },
+    ],
+    sourceUrl: 'https://www.conductor.build/docs/reference/diff-viewer',
+    sourceExtract: 'The Diff Viewer shows the code changes in a workspace.',
+  },
+  {
+    featureId: 'chat-turn-diff',
+    support: 'yes',
+    note: 'Each agent turn exposes a footer listing the files it changed; clicking a file jumps straight to its diff scoped to that turn — no manual commit needed to delimit the per-turn diff.',
+    screenshots: [
+      {
+        src: '/screenshots/conductor/diff-multi-views_turn-changes_20260518_1.png',
+        alt: 'Chat turn footer listing the files changed by a single agent turn, each acting as a shortcut to its diff',
       },
     ],
     sourceUrl: 'https://www.conductor.build/docs/reference/diff-viewer',
@@ -586,6 +595,20 @@ export const LATEST_KNOWN_FEATURES: FeatureSupport[] = [
         alt: 'Chat action menu exposing a "Fork to new workspace" item that clones the current workspace into a new worktree',
       },
     ],
+  },
+  {
+    featureId: 'unarchive-worktree',
+    support: 'yes',
+    note: 'Since v0.50.0, an explicit Unarchive action restores an auto-archived workspace (typically archived after PR merge) back to the active list with its worktree and session history intact.',
+    screenshots: [
+      {
+        src: '/screenshots/conductor/unarchive-worktree_20260525_1.png',
+        alt: 'Conductor History tab listing archived workspaces grouped by date, with an Unarchive action exposed on a row',
+        caption: 'History tab in the sidebar surfaces previously archived workspaces with an Unarchive action to bring them back to the active list.',
+      },
+    ],
+    sourceUrl: 'https://www.conductor.build/changelog',
+    sourceExtract: 'v0.50.0: Added an Unarchive action after auto-archiving a workspace when its PR is merged.',
   },
   { featureId: 'readonly-plan-research-mode', support: 'unknown', screenshots: [] },
   { featureId: 'in-app-voice-input', support: 'unknown', screenshots: [] },
