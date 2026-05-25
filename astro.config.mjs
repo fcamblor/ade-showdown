@@ -75,10 +75,12 @@ function securityHeaders() {
         const csp = [
           "default-src 'self'",
           "script-src 'self'",
-          "style-src 'self' https://fonts.googleapis.com",
-          "style-src-elem 'self' https://fonts.googleapis.com",
+          // Fonts are self-hosted (see Base.astro), so no third-party CSS
+          // host needs to be allowed for stylesheets or font files anymore.
+          "style-src 'self'",
+          "style-src-elem 'self'",
           "style-src-attr 'unsafe-inline'",
-          "font-src 'self' https://fonts.gstatic.com",
+          "font-src 'self'",
           "img-src 'self' https://avatars.githubusercontent.com data:",
           `connect-src 'self' ${httpHost} ${wsHost}`,
           "frame-ancestors 'none'",
