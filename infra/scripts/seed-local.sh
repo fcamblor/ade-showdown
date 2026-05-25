@@ -18,7 +18,7 @@ fi
 container="supabase_db_ade-arena"
 if ! docker ps --format '{{.Names}}' | grep -qx "$container"; then
   echo "Error: container '$container' is not running." >&2
-  echo "       Start the local Supabase stack first: \`supabase start\`." >&2
+  echo "       Start the local Supabase stack first: \`./infra/scripts/with-secrets.sh local supabase start\`." >&2
   exit 1
 fi
 

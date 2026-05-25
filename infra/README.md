@@ -6,11 +6,11 @@ This directory holds the local-only infra wiring.
 ## Quickstart
 
 ```bash
-mise install              # installs age, sops, supabase, node, pnpm pinned in mise.toml
-mise run bootstrap-local  # generates age key + infra/secrets/local.enc.yaml
-supabase start            # boots the local Supabase stack
-supabase db reset         # applies migrations
-mise run seed-local       # (optional) load supabase/seed.local.sql
+mise install                                                      # installs age, sops, supabase, node, pnpm pinned in mise.toml
+mise run bootstrap-local                                          # generates age key + infra/secrets/local.enc.yaml
+./infra/scripts/with-secrets.sh local supabase start              # boots the local Supabase stack with secrets injected
+supabase db reset                                                 # applies migrations
+mise run seed-local                                               # (optional) load supabase/seed.local.sql
 ./infra/scripts/with-secrets.sh local pnpm dev
 ```
 
@@ -38,6 +38,14 @@ re-edit them later with:
 ```bash
 sops infra/secrets/local.enc.yaml
 ```
+
+`supabase/config.toml` references these as `env(SUPABASE_AUTH_EXTERNAL_GITHUB_CLIENT_ID)`
+/ `env(SUPABASE_AUTH_EXTERNAL_GITHUB_SECRET)`. The Supabase CLI only interpolates
+those placeholders if the variables are present in the **environment of the
+`supabase start` process** — that is why the stack must be booted via
+`./infra/scripts/with-secrets.sh local supabase start` rather than a bare
+`supabase start`. Without the wrapper, the OAuth redirect URL still contains the
+literal `env(...)` string and GitHub returns a client-id error.
 
 ## Secrets
 
