@@ -776,8 +776,15 @@ function prettyUrl(u: string): string {
         img.className = 'evidence__shot';
         img.src = shot.src;
         img.alt = shot.alt;
-        img.loading = 'lazy';
+        // No `loading="lazy"` on purpose: the gallery only mounts after the
+        // user actively opens the proof, so we've already decided to pay
+        // for the screenshots. Lazy here would split the load across
+        // carousel navigations and — under dev's lax caching — refetch each
+        // image every time it re-enters the viewport via translateX.
         img.decoding = 'async';
+        // First slide warms first; the rest can wait their turn on the same
+        // connection but don't need to fight for priority.
+        img.setAttribute('fetchpriority', i === 0 ? 'high' : 'low');
 
         link.appendChild(img);
         li.appendChild(link);
