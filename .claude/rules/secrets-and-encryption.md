@@ -48,7 +48,7 @@ Scripts that decrypt (`infra/scripts/with-secrets.sh`) must **fail loud** if `so
 ## `SUPABASE_SERVICE_ROLE_KEY` isolation
 
 - **Never** in the Astro bundle (no reference under `src/`, no `PUBLIC_*` variable).
-- **Never** in Cloudflare Pages env vars in deployed envs (those are inlined into the build, ending up in the bundle).
+- **Never** in any frontend hosting env vars baked at build time (whatever the host — Bunny.net, Cloudflare Pages, Netlify, etc.). Anything passed to `astro build` is inlined into the bundle.
 - Only exposed to Supabase Edge Functions (platform-injected automatically). In local dev, the key is
   the public Supabase-CLI default value documented at
   [supabase.com/docs/guides/cli/local-development](https://supabase.com/docs/guides/cli/local-development).

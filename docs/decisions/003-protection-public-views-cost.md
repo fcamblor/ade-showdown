@@ -1,5 +1,7 @@
 # ADR 003 — Protecting public views against wallet-DoS
 
+> **Update (2026-05-27)**: hosting moved from Cloudflare Pages to Bunny.net (see ADR 005 in `ade-arena-infra`). The reasoning below remains valid — `_headers` is replaced by Bunny edge rules, and the "Cloudflare Worker" option in this ADR becomes "Bunny Edge Scripting or Supabase Edge Function" if revisited.
+
 - **Status**: Accepted
 - **Date**: 2026-05-22
 - **Deciders**: @fcamblor

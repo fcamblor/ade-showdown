@@ -16,7 +16,7 @@ Broken down into incrementally shippable milestones. Each feature is small enoug
 
 ## 🥇 Milestone 1 — Static MVP table
 
-> Goal: a readable table, deployable to Cloudflare Pages, contributable via PR.
+> Goal: a readable table, deployable to Bunny.net, contributable via PR.
 
 - [ ] **F1.1 — Layout & design system**: palette, typography, proper dark mode, final header/footer, logo/favicon.
 - [ ] **F1.2 — Sticky header** on both rows AND columns (feature name stays visible on horizontal scroll, orchestrator stays visible on vertical scroll).
@@ -26,9 +26,9 @@ Broken down into incrementally shippable milestones. Each feature is small enoug
 - [ ] **F1.6 — Filter & search** (category filter bar, text search on features, toggle "show only ✅/❌").
 - [ ] **F1.7 — Permalinks**: URL hashes to share `#feature/<id>` or `#tool/<id>@<version>`.
 - [ ] **F1.8 — Orchestrator detail page** (`/tools/<id>/<version>`) with identity card + full feature recap.
-- [ ] **F1.9 — GitHub Actions CI**: `pnpm check` + build on every PR + Cloudflare Pages preview.
+- [ ] **F1.9 — GitHub Actions CI**: `pnpm check` + build on every PR + Bunny.net preview deploy.
 - [ ] **F1.10 — Data lint**: `pnpm validate` script that verifies consistency (all `featureId`s exist, no duplicate versions, etc.).
-- [ ] **F1.11 — Cloudflare Pages deploy** + custom domain.
+- [ ] **F1.11 — Bunny.net deploy** + custom domain.
 - [ ] **F1.12 — CONTRIBUTING docs**: step-by-step tutorial + orchestrator template.
 
 ---
@@ -46,11 +46,11 @@ Broken down into incrementally shippable milestones. Each feature is small enoug
 
 ---
 
-## 🔐 Milestone 3 — Lightweight backend (Workers + D1)
+## 🔐 Milestone 3 — Lightweight backend (Supabase Edge Functions + Postgres)
 
 > Goal: lay down the serverless infra for Phase 2.
 
-- [ ] **F3.1 — Cloudflare Worker `api/`** (Hono or itty-router) with routing + CORS.
+- [ ] **F3.1 — Supabase Edge Function `api/`** with routing + CORS (replaces the earlier Cloudflare Worker plan; Supabase Edge Functions cover the API layer).
 - [ ] **F3.2 — D1 database**: `users`, `votes`, `feature_scores`, `sessions` schemas.
 - [ ] **F3.3 — GitHub OAuth**: `/api/auth/github` flow (redirect) + `/api/auth/callback` (exchange code → access token → upsert user → HttpOnly session cookie).
 - [ ] **F3.4 — `GET /api/me` endpoint** + header component displaying the logged-in user.

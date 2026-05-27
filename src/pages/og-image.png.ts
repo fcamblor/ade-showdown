@@ -6,7 +6,7 @@ import { fileURLToPath } from 'node:url';
 import satori from 'satori';
 import { Resvg } from '@resvg/resvg-js';
 
-// Prerendered at build time -> Cloudflare Pages serves it as a static PNG.
+// Prerendered at build time -> served as a static PNG by the CDN.
 // Re-runs of `astro build` regenerate the file from this code, so any change
 // to the layout, brand colors, or wording propagates without a manual export.
 export const prerender = true;

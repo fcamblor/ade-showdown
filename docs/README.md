@@ -6,8 +6,8 @@ This directory captures the structural choices behind the project and the reason
 
 - **Frontend**: Astro static + Svelte islands.
 - **Backend**: Supabase (Postgres + Auth + Edge Functions on Deno).
-- **Hosting**: Cloudflare Pages (static build).
-- **IaC**: Terraform (Supabase provider + Cloudflare provider).
+- **Hosting**: Bunny.net pull zone (static build).
+- **IaC**: Terraform (Supabase provider + Bunny.net provider, hosted on HCP Terraform).
 - **Secrets**: SOPS + age, files under `infra/secrets/<env>.enc.yaml`.
 
 ## Decisions (Architecture Decision Records)

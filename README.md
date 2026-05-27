@@ -6,8 +6,8 @@ Feature comparison of coding agent orchestrators (Conductor, Vibe Kanban, GitHub
 
 - [Astro](https://astro.build) + [Svelte 5](https://svelte.dev) (interactive islands)
 - Strict TypeScript + [Zod](https://zod.dev) for data validation
-- Deploy target: [Cloudflare Pages](https://pages.cloudflare.com) (free tier)
-- Phase 2: Cloudflare Workers + D1 for GitHub auth & votes
+- Deploy target: [Bunny.net](https://bunny.net) (EU edge, ~€2/month)
+- Backend: [Supabase](https://supabase.com) (Auth, Postgres, Edge Functions)
 
 ## Run locally
 

@@ -1,5 +1,7 @@
 # ADR 001 — JWT in localStorage rather than HttpOnly cookies
 
+> **Update (2026-05-27)**: hosting moved from Cloudflare Pages to Bunny.net (see ADR 005 in `ade-arena-infra`). The reasoning below remains valid — `_headers` is replaced by Bunny edge rules, and the "Cloudflare Worker" option in ADR 003 becomes "Bunny Edge Scripting or Supabase Edge Function" if revisited.
+
 - **Status**: Accepted
 - **Date**: 2026-05-22
 - **Deciders**: @fcamblor
