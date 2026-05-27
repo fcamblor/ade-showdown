@@ -22,6 +22,7 @@
   },
   "devDependencies": {
     "@resvg/resvg-js": "2.6.2",
+    "@types/node": "25.9.1",
     "satori": "0.26.0"
   }
 }
