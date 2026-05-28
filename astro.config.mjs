@@ -156,7 +156,18 @@ function securityHeaders() {
   };
 }
 
+// Canonical URL for sitemap + <link rel="canonical">. Provided per-env by the
+// deploy pipeline as PUBLIC_SITE_URL (dev → ade-arena-dev.camblor.fr, prod →
+// ade-arena.camblor.fr). Falls back to localhost for local dev so canonical
+// tags never silently point at a real deployment host.
+const siteUrl = process.env.PUBLIC_SITE_URL ?? 'http://localhost:4321';
+if (!process.env.PUBLIC_SITE_URL && process.env.CI) {
+  console.warn(
+    '[astro] PUBLIC_SITE_URL is unset in CI — canonical URLs/sitemap will use the localhost fallback.',
+  );
+}
+
 export default defineConfig({
   integrations: [svelte(), versionManifest(), securityHeaders()],
-  site: process.env.PUBLIC_SITE_URL ?? 'https://ade-arena-dev.b-cdn.net',
+  site: siteUrl,
 });
