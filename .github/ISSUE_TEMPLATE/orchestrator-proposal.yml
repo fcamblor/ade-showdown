@@ -1,0 +1,96 @@
+name: 🆕 Orchestrator / version proposal
+description: Propose a new orchestrator, or a new version of an existing one, using the in-app contribution tunnel.
+title: "feat(data): <tool> <version>"
+labels: ["orchestrator-proposal"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        This issue collects the **output of the contribution tunnel**.
+
+        Before filling it in, run the guided flow at
+        **https://ade-arena.camblor.fr/contribute** — it walks every feature,
+        lets you attach screenshots, and produces:
+
+        - a **ZIP** (data file + screenshots, repo-relative paths), and
+        - a **Markdown summary** copied to your clipboard.
+
+        Everything stays on your device until you export. The tunnel reopens
+        this issue pre-filled at the end, so the quickest path is: run the
+        tunnel, then come back here and paste / attach its output.
+
+  - type: checkboxes
+    id: workflow
+    attributes:
+      label: Before you submit
+      options:
+        - label: I ran the contribution tunnel at https://ade-arena.camblor.fr/contribute and exported the proposal.
+          required: true
+        - label: I pasted the generated Markdown summary in the "Generated payload" field below.
+          required: true
+        - label: I attached the exported ZIP (or dragged its screenshots) to this issue.
+          required: true
+        - label: Every screenshot I included has alt text.
+          required: true
+        - label: I consent to making public any information visible in the screenshots I attached (this issue and its attachments are publicly accessible).
+          required: true
+
+  - type: dropdown
+    id: mode
+    attributes:
+      label: Kind of proposal
+      options:
+        - New orchestrator
+        - New version of an existing orchestrator
+    validations:
+      required: true
+
+  - type: input
+    id: tool-name
+    attributes:
+      label: Tool name
+      placeholder: e.g. Conductor
+    validations:
+      required: true
+
+  - type: input
+    id: tool-id
+    attributes:
+      label: Tool id
+      description: Lowercase slug used in data paths (`a-z`, `0-9`, `-`).
+      placeholder: e.g. conductor
+    validations:
+      required: true
+
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      placeholder: e.g. 1.4.0
+    validations:
+      required: true
+
+  - type: input
+    id: homepage
+    attributes:
+      label: Homepage
+      placeholder: https://…
+    validations:
+      required: true
+
+  - type: textarea
+    id: payload
+    attributes:
+      label: Generated payload (Markdown)
+      description: Paste the summary copied from the contribution tunnel here.
+      placeholder: Paste the Markdown summary copied from /contribute…
+    validations:
+      required: true
+
+  - type: markdown
+    attributes:
+      value: |
+        ### Attachments
+
+        Drag the **ZIP exported from the tunnel** (or its screenshots) into this
+        issue so a maintainer can transcribe the data file and assets.
