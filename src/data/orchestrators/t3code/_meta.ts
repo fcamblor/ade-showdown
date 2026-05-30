@@ -86,5 +86,10 @@ export const META: OrchestratorMeta = {
       label: 't3.codes homepage',
       url: 'https://t3.codes/',
     },
+    {
+      kind: 'docs',
+      label: 't3code DeepWiki',
+      url: 'https://deepwiki.com/pingdotgg/t3code/',
+    },
   ],
 };
