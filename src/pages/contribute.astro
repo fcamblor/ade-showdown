@@ -1,0 +1,47 @@
+---
+import Base from '../layouts/Base.astro';
+import ContributeTunnel from '../components/ContributeTunnel.svelte';
+import { ORCHESTRATORS_BY_TOOL } from '../data';
+import { RATABLE_FEATURES } from '../lib/ratable-features';
+import type { ToolBaseline } from '../lib/contribution/types';
+
+// Lightweight, serializable feature list for the tunnel — only the fields the
+// UI renders, so the whole data layer is not shipped to the client.
+const features = RATABLE_FEATURES.map((f) => ({
+  id: f.id,
+  label: f.label,
+  category: f.category,
+  shortDescription: f.shortDescription,
+  longDescription: f.longDescription,
+  whyImportant: f.whyImportant,
+}));
+
+// One baseline per tool — its newest known version — so "new version of an
+// existing tool" can pre-fill every feature and flag what the contributor
+// changes.
+const baselines: ToolBaseline[] = Object.values(ORCHESTRATORS_BY_TOOL)
+  .map((versions) => versions[0])
+  .map((latest) => ({
+    toolId: latest.toolId,
+    toolName: latest.toolName,
+    homepage: latest.homepage,
+    vendor: latest.vendor,
+    pricing: latest.pricing,
+    codebase: latest.codebase,
+    platforms: [...latest.platforms],
+    modelRestriction: latest.modelRestriction?.message,
+    baseVersion: latest.version,
+    features: latest.features.map((s) => ({
+      featureId: s.featureId,
+      support: s.support,
+      note: s.note,
+      sourceUrl: s.sourceUrl,
+      sourceExtract: s.sourceExtract,
+      screenshotCount: s.screenshots?.length ?? 0,
+    })),
+  }))
+  .sort((a, b) => a.toolName.localeCompare(b.toolName));
+---
+<Base title="Propose an orchestrator — ADE Arena">
+  <ContributeTunnel features={features} baselines={baselines} client:load />
+</Base>
