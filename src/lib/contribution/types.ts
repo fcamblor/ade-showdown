@@ -1,4 +1,4 @@
-import type { FeatureId, Platform, SupportLevel } from '../../data/schema';
+import type { FeatureId, Platform, SupportLevel, TrackingSourceKind } from '../../data/schema';
 
 // Draft model for the in-browser "propose an orchestrator / version" tunnel.
 //
@@ -90,6 +90,20 @@ export type DraftFeatureSupport = {
   reviewed?: boolean;
 };
 
+// A source the dataset should watch to stay current on this ADE — its
+// changelog, release notes, GitHub releases/commits, docs, blog, RSS/Atom
+// feed, website, etc. Mirrors the editable fields of the schema's
+// `TrackingSource`. Captured by the tunnel in `new-tool` mode only; in
+// `new-version` mode the meta (and thus this list) is inherited from the
+// baseline and not re-authored here. The contribution review skill treats
+// this list as a starting point and completes it with a research pass.
+export type ContributionTrackingSource = {
+  kind: TrackingSourceKind;
+  label: string;
+  url: string;
+  notes?: string;
+};
+
 // Tool-level metadata. Mirrors the editable fields of `OrchestratorMeta`.
 // Source evidence (pricingSource, platformSources, …) is intentionally left
 // to the maintainer integrating the PR — the tunnel keeps the contributor
@@ -103,6 +117,12 @@ export type ContributionMeta = {
   codebase?: 'open-source' | 'proprietary';
   platforms: Platform[];
   modelRestriction?: string;
+  /**
+   * `new-tool` only: where to watch for future releases / feature changes.
+   * Optional and free-form — the maintainer (and the review skill's research
+   * pass) complete it before the data lands.
+   */
+  trackingSources?: ContributionTrackingSource[];
 };
 
 export type ContributionDraft = {

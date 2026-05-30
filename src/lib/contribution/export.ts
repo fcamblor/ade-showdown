@@ -155,6 +155,17 @@ export async function buildProposal(
     features: allGen,
     changedFeatureIds,
     screenshotCount,
+    trackingSources:
+      draft.mode === 'new-tool'
+        ? (draft.meta.trackingSources ?? [])
+            .filter((t) => t.url.trim())
+            .map((t) => ({
+              kind: t.kind,
+              label: t.label.trim(),
+              url: t.url.trim(),
+              notes: norm(t.notes),
+            }))
+        : undefined,
   };
   const markdown = genProposalMarkdown(summary);
   // PROPOSAL.md ships inside the ZIP — deliberately without the review remarks.

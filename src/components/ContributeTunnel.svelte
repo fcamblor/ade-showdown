@@ -1,9 +1,10 @@
 <script lang="ts">
   import { onMount } from 'svelte';
-  import type { Platform, SupportLevel } from '../data/schema';
+  import type { Platform, SupportLevel, TrackingSourceKind } from '../data/schema';
   import type {
     ContributionDraft,
     ContributionMode,
+    ContributionTrackingSource,
     DraftFeatureSupport,
     DraftScreenshot,
     ToolBaseline,
@@ -52,6 +53,23 @@
     { value: 'windows', label: 'Windows' },
     { value: 'linux', label: 'Linux' },
     { value: 'web', label: 'Web' },
+  ];
+  // Tracking-source kinds mirror `TrackingSourceKindSchema` in src/data/schema.ts.
+  // These are the places the dataset watches to stay current on an ADE; the
+  // contribution review skill completes whatever the contributor leaves out.
+  const TRACKING_KIND_OPTIONS: { value: TrackingSourceKind; label: string }[] = [
+    { value: 'docs', label: 'Documentation' },
+    { value: 'changelog', label: 'Changelog' },
+    { value: 'release-notes', label: 'Release notes' },
+    { value: 'github-releases', label: 'GitHub releases' },
+    { value: 'github-commits', label: 'GitHub commits' },
+    { value: 'rss', label: 'RSS / Atom feed' },
+    { value: 'blog', label: 'Blog' },
+    { value: 'docs-diff', label: 'Docs diff' },
+    { value: 'discord', label: 'Discord' },
+    { value: 'twitter', label: 'X / Twitter' },
+    { value: 'youtube', label: 'YouTube' },
+    { value: 'other', label: 'Other (website, forum…)' },
   ];
 
   type Step = 'start' | 'meta' | 'features' | 'review';
@@ -265,6 +283,32 @@
     if (!draft) return;
     draft.meta.toolName = value;
     if (draft.mode === 'new-tool') draft.meta.toolId = slugify(value);
+    void persist();
+  }
+
+  // ----- tracking sources (new-tool only) ----------------------------------
+  // The contributor lists where to watch for future releases of the ADE
+  // (changelog, release notes, GitHub releases/commits, docs, RSS, blog…). The
+  // review skill completes whatever is missing with a research pass.
+
+  function addTrackingSource() {
+    if (!draft) return;
+    const list = draft.meta.trackingSources ?? [];
+    draft.meta.trackingSources = [...list, { kind: 'changelog', label: '', url: '' }];
+    void persist();
+  }
+
+  function setTrackingField(index: number, field: keyof ContributionTrackingSource, value: string) {
+    if (!draft?.meta.trackingSources) return;
+    const next = [...draft.meta.trackingSources];
+    next[index] = { ...next[index], [field]: value };
+    draft.meta.trackingSources = next;
+    void persist();
+  }
+
+  function removeTrackingSource(index: number) {
+    if (!draft?.meta.trackingSources) return;
+    draft.meta.trackingSources = draft.meta.trackingSources.filter((_, i) => i !== index);
     void persist();
   }
 
@@ -818,6 +862,46 @@
             </label>
           {/each}
         </fieldset>
+
+        <div class="contrib__tracking">
+          <div class="contrib__tracking-head">
+            <div>
+              <span class="contrib__tracking-title">Tracking sources <em>(optional)</em></span>
+              <p class="contrib__tracking-hint">
+                Where should we watch for future releases of this ADE? Add its changelog, release
+                notes, GitHub releases/commits, docs, RSS/Atom feed, blog… A maintainer completes
+                whatever you leave out, so even one or two links help.
+              </p>
+            </div>
+            <button type="button" class="contrib__ghost contrib__tracking-add" on:click={addTrackingSource}>+ Add source</button>
+          </div>
+          {#each draft.meta.trackingSources ?? [] as src, i (i)}
+            <div class="contrib__tracking-row">
+              <select
+                aria-label="Source kind"
+                value={src.kind}
+                on:change={(e) => setTrackingField(i, 'kind', e.currentTarget.value)}
+              >
+                {#each TRACKING_KIND_OPTIONS as opt}
+                  <option value={opt.value}>{opt.label}</option>
+                {/each}
+              </select>
+              <input
+                type="text"
+                placeholder="Label (e.g. Conductor changelog)"
+                value={src.label}
+                on:input={(e) => setTrackingField(i, 'label', e.currentTarget.value)}
+              />
+              <input
+                type="url"
+                placeholder="https://…"
+                value={src.url}
+                on:input={(e) => setTrackingField(i, 'url', e.currentTarget.value)}
+              />
+              <button type="button" class="contrib__del" on:click={() => removeTrackingSource(i)} aria-label="Remove tracking source">✕</button>
+            </div>
+          {/each}
+        </div>
       {:else}
         <p class="contrib__muted">
           Metadata inherited from {draft.meta.toolName} {draft.baseVersion}. Adjust the version and
@@ -1191,6 +1275,16 @@
   .contrib__check--on { border-color: var(--accent); background: color-mix(in oklch, var(--accent) 14%, var(--bg-row)); }
   .contrib__check input, .contrib__upload input { accent-color: var(--accent); }
   .contrib__upload input { display: none; }
+
+  /* Tracking sources — the contributor's watch list for future releases. */
+  .contrib__tracking { margin-top: 16px; border: 1px solid var(--border); border-radius: var(--radius-md); padding: 12px 14px; display: grid; gap: 10px; }
+  .contrib__tracking-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+  .contrib__tracking-title { font-weight: 700; color: var(--fg-soft); font-size: 0.85rem; }
+  .contrib__tracking-title em { color: var(--fg-muted); font-style: normal; }
+  .contrib__tracking-hint { margin: 4px 0 0; color: var(--fg-muted); font-size: 0.78rem; line-height: 1.45; }
+  .contrib__tracking-add { min-height: 34px; padding: 6px 12px; font-size: 0.8rem; flex: none; }
+  .contrib__tracking-row { display: grid; grid-template-columns: minmax(120px, 0.7fr) 1fr 1.4fr auto; gap: 8px; align-items: center; }
+  @media (max-width: 560px) { .contrib__tracking-row { grid-template-columns: 1fr 1fr; } }
 
   .contrib__support { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
   .contrib__toggle {
