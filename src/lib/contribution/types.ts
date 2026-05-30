@@ -75,6 +75,15 @@ export type DraftFeatureSupport = {
   sourceUrl?: string;
   sourceExtract?: string;
   screenshots: DraftScreenshot[];
+  /**
+   * Free-form remark aimed at the maintainer reviewing the proposal — e.g. "the
+   * docs look stale, please re-scan and maybe add this URL to the ADE's source
+   * list". Deliberately NOT part of the persisted dataset: it never reaches the
+   * generated `.ts` files nor the export ZIP. It is appended (contextualised to
+   * this feature) to the Markdown copied to the clipboard, so it lands in the
+   * GitHub issue body to drive the review.
+   */
+  reviewRemark?: string;
   /** Present only in `new-version` mode — the latest-known baseline value. */
   inherited?: InheritedSupport;
   /** Set once the contributor has visited and confirmed this feature. */

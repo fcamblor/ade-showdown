@@ -3,11 +3,13 @@ import {
   genLatestKnownFile,
   genMetaFile,
   genProposalMarkdown,
+  genReviewRemarksMarkdown,
   genVersionFileDiff,
   genVersionFileNewTool,
   type GenFeatureSupport,
   type GenScreenshot,
   type ProposalSummary,
+  type ReviewRemark,
 } from './codegen';
 import { blobEntry, makeZip, textEntry, type ZipEntry } from './zip';
 import type { ContributionDraft, DraftFeatureSupport } from './types';
@@ -72,11 +74,20 @@ function hasChanged(fs: DraftFeatureSupport): boolean {
 
 export type BuiltProposal = {
   zip: Blob;
+  /** Summary shipped inside the ZIP (PROPOSAL.md). Never carries review remarks. */
   markdown: string;
+  /**
+   * Summary copied to the clipboard for the GitHub issue body: the PROPOSAL.md
+   * content plus a "Review remarks" section when the author flagged any. Kept
+   * separate from `markdown` so the remarks stay out of the exported ZIP.
+   */
+  clipboardMarkdown: string;
   filename: string;
   issueUrl: string;
   changedCount: number;
   screenshotCount: number;
+  /** Number of features carrying a review remark (clipboard only). */
+  remarkCount: number;
 };
 
 // Assemble every artefact for a draft: the ZIP (repo-relative paths so the
@@ -86,6 +97,7 @@ export type BuiltProposal = {
 export async function buildProposal(
   draft: ContributionDraft,
   orderedFeatureIds: string[],
+  featureLabels: Record<string, string> = {},
 ): Promise<BuiltProposal> {
   const toolId = draft.meta.toolId;
   const ordered = orderedFeatureIds
@@ -145,15 +157,30 @@ export async function buildProposal(
     screenshotCount,
   };
   const markdown = genProposalMarkdown(summary);
+  // PROPOSAL.md ships inside the ZIP — deliberately without the review remarks.
   entries.unshift(textEntry('PROPOSAL.md', markdown));
+
+  // Review remarks are review metadata, not dataset content: they are appended
+  // only to the clipboard Markdown (the GitHub issue body), never to the ZIP.
+  const remarks: ReviewRemark[] = ordered
+    .map((fs) => ({
+      featureId: fs.featureId,
+      label: featureLabels[fs.featureId],
+      remark: norm(fs.reviewRemark) ?? '',
+    }))
+    .filter((r) => r.remark);
+  const remarksMarkdown = genReviewRemarksMarkdown(remarks);
+  const clipboardMarkdown = remarksMarkdown ? `${markdown}\n${remarksMarkdown}` : markdown;
 
   return {
     zip: makeZip(entries),
     markdown,
+    clipboardMarkdown,
     filename: `${toolId}-${draft.version}-proposal.zip`,
     issueUrl: buildIssueUrl(draft),
     changedCount: changedFeatureIds.length,
     screenshotCount,
+    remarkCount: remarks.length,
   };
 }
 

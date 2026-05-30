@@ -194,6 +194,17 @@ export type ProposalSummary = {
   screenshotCount: number;
 };
 
+// A maintainer-facing remark attached to a feature. Carried separately from the
+// dataset: it is never written to the generated `.ts` files nor to PROPOSAL.md
+// (which ships in the ZIP). It only feeds the clipboard Markdown that lands in
+// the GitHub issue, so the reviewer knows what to double-check.
+export type ReviewRemark = {
+  featureId: string;
+  /** Human-readable feature label, when known — otherwise the id is used. */
+  label?: string;
+  remark: string;
+};
+
 export function genProposalMarkdown(s: ProposalSummary): string {
   const lines: string[] = [];
   const heading =
@@ -234,6 +245,29 @@ export function genProposalMarkdown(s: ProposalSummary): string {
   lines.push('');
   if (s.mode === 'new-version' && rows.length === 0) {
     lines.push('_No feature changes recorded versus the baseline._', '');
+  }
+  return lines.join('\n');
+}
+
+// ----- review remarks (clipboard only, never in the ZIP) -----------------
+
+// Render the per-feature remarks as a Markdown section, each grouped under its
+// feature so the reviewer reads them in context. Returns an empty string when
+// there is nothing to surface, so callers can append unconditionally.
+export function genReviewRemarksMarkdown(remarks: ReviewRemark[]): string {
+  const filled = remarks.filter((r) => r.remark.trim());
+  if (filled.length === 0) return '';
+  const lines: string[] = [];
+  lines.push('## Review remarks', '');
+  lines.push('_Author-flagged points to double-check during review — not part of the dataset._', '');
+  for (const r of filled) {
+    const heading = r.label ? `${r.label} (\`${r.featureId}\`)` : `\`${r.featureId}\``;
+    lines.push(`### ${heading}`, '');
+    // Preserve the author's line breaks as a Markdown blockquote.
+    for (const line of r.remark.trim().split('\n')) {
+      lines.push(`> ${line}`.trimEnd());
+    }
+    lines.push('');
   }
   return lines.join('\n');
 }

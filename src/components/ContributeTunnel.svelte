@@ -75,6 +75,11 @@
   let screenshotConsent = false;
 
   const orderedFeatureIds = features.map((f) => f.id);
+  // Feature id → human label, so review remarks read with their feature name in
+  // the clipboard summary that feeds the GitHub issue.
+  const featureLabels: Record<string, string> = Object.fromEntries(
+    features.map((f) => [f.id, f.label]),
+  );
 
   $: currentFeature = features[currentIndex];
   $: currentSupport = draft && currentFeature ? draft.features[currentFeature.id] : undefined;
@@ -301,7 +306,7 @@
     void persist();
   }
 
-  function setField(field: 'note' | 'sourceUrl' | 'sourceExtract', value: string) {
+  function setField(field: 'note' | 'sourceUrl' | 'sourceExtract' | 'reviewRemark', value: string) {
     if (!draft || !currentFeature) return;
     (draft.features[currentFeature.id] as any)[field] = value;
     void persist();
@@ -658,7 +663,7 @@
     busy = true;
     error = '';
     try {
-      built = await buildProposal(draft, orderedFeatureIds);
+      built = await buildProposal(draft, orderedFeatureIds, featureLabels);
     } catch (err) {
       error = err instanceof Error ? err.message : 'Failed to build the proposal.';
     } finally {
@@ -672,7 +677,7 @@
 
   async function doCopyMarkdown() {
     if (!built) return;
-    copiedMd = await copyToClipboard(built.markdown);
+    copiedMd = await copyToClipboard(built.clipboardMarkdown);
     if (copiedMd) setTimeout(() => (copiedMd = false), 2500);
   }
 </script>
@@ -842,6 +847,7 @@
         <p class="contrib__eyebrow">
           {currentFeature.category}
           {#if changedFromBaseline(currentSupport)}<span class="contrib__badge">changed</span>{/if}
+          {#if currentSupport?.reviewRemark?.trim()}<span class="contrib__badge contrib__badge--remark">remark</span>{/if}
         </p>
         {#if hasProof}
           {#key proofKey}
@@ -999,6 +1005,25 @@
         {/each}
       </div>
 
+      <div class="contrib__remark">
+        <label>
+          <span class="contrib__remark-head">
+            Review remark
+            <em>for the reviewer — not exported</em>
+          </span>
+          <textarea
+            rows="3"
+            placeholder="e.g. the docs look stale on this feature — please re-scan and maybe add https://… to this ADE's source list before merging."
+            value={currentSupport?.reviewRemark ?? ''}
+            on:input={(e) => setField('reviewRemark', e.currentTarget.value)}
+          ></textarea>
+        </label>
+        <p class="contrib__remark-hint">
+          Kept out of the ZIP and the dataset. Copied (under this feature) into the summary you paste
+          in the GitHub issue, so a maintainer knows what to double-check.
+        </p>
+      </div>
+
       <div class="contrib__actions">
         <button type="button" class="contrib__ghost" on:click={goPrev}>← Previous</button>
         <button type="button" class="contrib__ghost" on:click={() => (step = 'review')}>Skip to export</button>
@@ -1049,7 +1074,8 @@
         <div class="contrib__result">
           <p>
             Bundle ready: {built.screenshotCount} screenshot(s)
-            {#if draft.mode === 'new-version'}· {built.changedCount} changed feature(s){/if}.
+            {#if draft.mode === 'new-version'}· {built.changedCount} changed feature(s){/if}
+            {#if built.remarkCount > 0}· {built.remarkCount} review remark(s){/if}.
           </p>
           <div class="contrib__actions contrib__actions--start">
             <button type="button" on:click={doDownload}>⬇ Download ZIP</button>
@@ -1059,6 +1085,9 @@
           <p class="contrib__muted">
             Unzip at the repo root, then open the issue and paste the copied summary into the
             "Generated payload" field (and drag the screenshots in if you like).
+            {#if built.remarkCount > 0}
+              The copied summary includes your {built.remarkCount} review remark(s); the ZIP does not.
+            {/if}
           </p>
         </div>
       {/if}
@@ -1195,6 +1224,18 @@
   .contrib__verdict--unknown { color: var(--cell-unknown-ink); }
   .contrib__verdict .contrib__glyph { font-size: 1rem; }
 
+  /* Review remark — visually set apart from the data fields so it reads as a
+     note to the maintainer that never ships in the export. */
+  .contrib__remark {
+    margin-top: 16px; padding: 12px 14px; display: grid; gap: 6px;
+    border: 1px dashed var(--border-strong); border-radius: var(--radius-md);
+    background: color-mix(in oklch, var(--accent) 5%, var(--bg-row));
+  }
+  .contrib__remark label { display: grid; gap: 4px; font-size: 0.85rem; color: var(--fg-soft); }
+  .contrib__remark-head { display: flex; align-items: baseline; gap: 8px; font-weight: 700; }
+  .contrib__remark-head em { color: var(--fg-muted); font-style: normal; font-weight: 600; font-size: 0.78rem; }
+  .contrib__remark-hint { margin: 0; color: var(--fg-muted); font-size: 0.78rem; line-height: 1.45; }
+
   .contrib__shots { margin-top: 18px; border-top: 1px solid var(--border-soft); padding-top: 14px; display: grid; gap: 12px; border-radius: var(--radius-md); transition: background 140ms ease; }
   .contrib__shots--drag { background: color-mix(in oklch, var(--accent) 12%, transparent); outline: 2px dashed var(--accent); outline-offset: 4px; }
   .contrib__shots-head { display: flex; align-items: center; justify-content: space-between; font-weight: 700; color: var(--fg-soft); }
@@ -1245,6 +1286,7 @@
   .contrib__bar { height: 8px; border-radius: 999px; background: var(--bg-row); overflow: hidden; border: 1px solid var(--border); }
   .contrib__bar i { display: block; height: 100%; background: var(--accent); transition: width 280ms ease; }
   .contrib__badge { display: inline-block; margin-left: 8px; padding: 2px 8px; border-radius: 999px; background: color-mix(in oklch, var(--cell-partial) 40%, transparent); border: 1px solid var(--cell-partial); color: var(--cell-partial-ink); font-size: 0.7rem; letter-spacing: 0.1em; }
+  .contrib__badge--remark { background: color-mix(in oklch, var(--accent) 22%, transparent); border-color: var(--accent); color: var(--accent); }
 
   .contrib__drafts { margin-top: 22px; border-top: 1px solid var(--border-soft); padding-top: 14px; }
   .contrib__drafts ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
