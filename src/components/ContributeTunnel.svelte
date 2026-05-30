@@ -393,11 +393,88 @@
     dragOver = false;
   }
 
+  // Collect every image carried by a DataTransfer (drop or paste). Inline
+  // screenshots dragged from apps like Skitch never reach `.files`; they only
+  // surface as `.items` of kind 'file' or as a `text/html`/`text/uri-list`
+  // payload pointing at the bitmap (often a data: URL). Read all string data
+  // synchronously here — a DataTransfer becomes inert after the first await.
+  function readImageSources(dt: DataTransfer): { files: File[]; urls: string[] } {
+    const files: File[] = [];
+    const urls: string[] = [];
+    // The same bitmap is usually mirrored in both `.files` and `.items` — key
+    // by identity to avoid registering one drop/paste as two screenshots.
+    const seen = new Set<string>();
+    const addFile = (f: File | null) => {
+      if (!f || !f.type.startsWith('image/')) return;
+      const key = `${f.name}:${f.size}:${f.lastModified}`;
+      if (seen.has(key)) return;
+      seen.add(key);
+      files.push(f);
+    };
+    if (dt.files) {
+      for (const f of Array.from(dt.files)) addFile(f);
+    }
+    if (dt.items) {
+      for (const it of Array.from(dt.items)) {
+        if (it.kind === 'file') addFile(it.getAsFile());
+      }
+    }
+    if (files.length === 0) {
+      const html = dt.getData('text/html');
+      const imgSrc = html?.match(/<img[^>]+src=["']([^"']+)["']/i)?.[1];
+      if (imgSrc) urls.push(imgSrc);
+      const uriList = dt.getData('text/uri-list');
+      if (uriList) {
+        for (const line of uriList.split(/\r?\n/)) {
+          const t = line.trim();
+          if (t && !t.startsWith('#')) urls.push(t);
+        }
+      }
+      const plain = dt.getData('text/plain')?.trim();
+      if (plain && (plain.startsWith('data:image/') || /^https?:\/\//i.test(plain))) {
+        urls.push(plain);
+      }
+    }
+    return { files, urls };
+  }
+
+  // Resolve image URLs (data: or http) extracted from a transfer into Files.
+  async function urlsToImageFiles(urls: string[]): Promise<File[]> {
+    const out: File[] = [];
+    for (const url of [...new Set(urls)]) {
+      try {
+        const res = await fetch(url);
+        if (!res.ok) continue;
+        const blob = await res.blob();
+        if (!blob.type.startsWith('image/')) continue;
+        out.push(new File([blob], 'pasted-image', { type: blob.type }));
+      } catch {
+        // Cross-origin or otherwise unreachable source: skip silently.
+      }
+    }
+    return out;
+  }
+
+  async function addFromTransfer(dt: DataTransfer | null): Promise<boolean> {
+    if (!dt) return false;
+    const { files, urls } = readImageSources(dt);
+    const resolved = await urlsToImageFiles(urls);
+    const all = [...files, ...resolved];
+    if (all.length === 0) return false;
+    await addFiles(all);
+    return true;
+  }
+
   async function onDrop(event: DragEvent) {
     event.preventDefault();
     dragOver = false;
-    const files = event.dataTransfer?.files;
-    if (files && files.length) await addFiles(Array.from(files));
+    await addFromTransfer(event.dataTransfer);
+  }
+
+  async function onPaste(event: ClipboardEvent) {
+    if (!draft || !currentFeature) return;
+    const added = await addFromTransfer(event.clipboardData);
+    if (added) event.preventDefault();
   }
 
   async function removeScreenshot(shotId: string) {
@@ -859,7 +936,7 @@
         </div>
         <label class="contrib__dropzone">
           <input type="file" accept="image/*" multiple on:change={onFiles} />
-          <span>{dragOver ? 'Drop images here' : 'Drag & drop screenshots here, or click to browse'}</span>
+          <span>{dragOver ? 'Drop images here' : 'Drag & drop or paste screenshots here, or click to browse'}</span>
         </label>
         {#if (currentSupport?.screenshots?.filter(isUserAdded).length ?? 0) > 0}
           <p class="contrib__warn" role="alert">
@@ -1017,7 +1094,7 @@
   </div>
 {/if}
 
-<svelte:window on:keydown={onLightboxKey} />
+<svelte:window on:keydown={onLightboxKey} on:paste={onPaste} />
 
 <style>
   .contrib { max-width: min(900px, 100%); margin: 0 auto; display: grid; gap: 16px; }
