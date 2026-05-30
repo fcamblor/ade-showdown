@@ -44,7 +44,7 @@ const features: Feature[] = [
     category: 'workflow',
     shortDescription: 'Attach several chat sessions to one worktree for context resets, mixed models, or parallel sub-topics.',
     longDescription:
-      'A single worktree can host multiple independent agent sessions running in parallel, each with its own context, model, and topic — useful to reset context, mix models, or split unrelated subjects without leaving the worktree.',
+      'A single worktree can host multiple independent agent sessions running in parallel, each with its own context, model, and topic — useful to reset context, mix models, or split unrelated subjects without leaving the worktree. Each session must also be visually attached to its parent worktree in the UI, so it stays obvious at a glance which sessions share the same workspace.',
     whyImportant: {
       short: 'Multiple sessions let you split investigation, implementation, and review without changing workspace.',
       long: 'A single worktree can carry more than one conversation: one agent can explore, another can implement, and another can review. This matters when you want parallelism but still want all changes to converge in one branch.',
