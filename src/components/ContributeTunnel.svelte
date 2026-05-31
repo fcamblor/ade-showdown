@@ -1231,6 +1231,10 @@
           <p class="contrib__muted">
             Unzip {built.parts.length > 1 ? 'all parts' : ''} at the repo root, then open the issue and paste the copied summary into the
             "Generated payload" field (and drag the screenshots in if you like).
+            {#if draft.mode === 'new-version'}
+              The copied summary also lists every text change (support, note, sources, screenshot
+              alt/caption) and added/removed screenshot vs the {draft.baseVersion} baseline.
+            {/if}
             {#if built.remarkCount > 0}
               The copied summary includes your {built.remarkCount} review remark(s); the ZIP does not.
             {/if}

@@ -224,6 +224,36 @@ export type ReviewRemark = {
   remark: string;
 };
 
+// A single edited text field on a feature (support level, note, source URL or
+// source extract), expressed as before/after against the baseline.
+export type TextChange = {
+  /** Human-readable field label, e.g. `support`, `note`, `source URL`. */
+  field: string;
+  before?: string;
+  after?: string;
+};
+
+// A screenshot change vs the baseline: a freshly attached shot, a baseline shot
+// dropped, or a baseline shot whose alt/caption text was edited.
+export type ScreenshotChange = {
+  kind: 'added' | 'removed' | 'edited';
+  /** Filename (added) or published path (removed/edited) identifying the shot. */
+  ref: string;
+  altBefore?: string;
+  altAfter?: string;
+  captionBefore?: string;
+  captionAfter?: string;
+};
+
+// Per-feature collection of everything that moved vs the baseline. Only features
+// that actually changed get an entry.
+export type FeatureChange = {
+  featureId: string;
+  label?: string;
+  textChanges: TextChange[];
+  screenshotChanges: ScreenshotChange[];
+};
+
 export function genProposalMarkdown(s: ProposalSummary): string {
   const lines: string[] = [];
   const heading =
@@ -300,6 +330,62 @@ export function genReviewRemarksMarkdown(remarks: ReviewRemark[]): string {
     // Preserve the author's line breaks as a Markdown blockquote.
     for (const line of r.remark.trim().split('\n')) {
       lines.push(`> ${line}`.trimEnd());
+    }
+    lines.push('');
+  }
+  return lines.join('\n');
+}
+
+// ----- change report (clipboard only, never in the ZIP) ------------------
+
+// Render a single value for an inline before/after, collapsing newlines and
+// marking an empty value so a "set"/"cleared" change reads unambiguously.
+function inlineValue(value: string | undefined): string {
+  const trimmed = value?.trim();
+  if (!trimmed) return '_(empty)_';
+  return trimmed.replace(/\n+/g, ' ');
+}
+
+function beforeAfter(before: string | undefined, after: string | undefined): string {
+  return `${inlineValue(before)} → ${inlineValue(after)}`;
+}
+
+// Render the per-feature changes vs the baseline as a Markdown section: which
+// text fields were edited, and which screenshots were added/removed/re-captioned.
+// Clipboard-only, like the review remarks — the diff is review context, not
+// dataset content (the generated override .ts already carries the new values).
+// Returns an empty string when nothing changed so callers can append freely.
+export function genChangeReportMarkdown(changes: FeatureChange[], baseVersion: string): string {
+  const meaningful = changes.filter(
+    (c) => c.textChanges.length > 0 || c.screenshotChanges.length > 0,
+  );
+  if (meaningful.length === 0) return '';
+  const lines: string[] = [];
+  lines.push(`## Changes vs baseline \`${baseVersion}\``, '');
+  lines.push(
+    '_Per-feature diff of edited text (support, note, sources, screenshot alt/caption) and added/removed screenshots, for review. Not part of the dataset._',
+    '',
+  );
+  for (const c of meaningful) {
+    const heading = c.label ? `${c.label} (\`${c.featureId}\`)` : `\`${c.featureId}\``;
+    lines.push(`### ${heading}`, '');
+    for (const t of c.textChanges) {
+      lines.push(`- **${t.field}**: ${beforeAfter(t.before, t.after)}`);
+    }
+    for (const sc of c.screenshotChanges) {
+      if (sc.kind === 'added') {
+        lines.push(`- 🖼️ screenshot added: \`${sc.ref}\` — alt: ${inlineValue(sc.altAfter)}`);
+      } else if (sc.kind === 'removed') {
+        lines.push(`- 🗑️ screenshot removed: \`${sc.ref}\` — alt: ${inlineValue(sc.altBefore)}`);
+      } else {
+        lines.push(`- ✏️ screenshot edited: \`${sc.ref}\``);
+        if (inlineValue(sc.altBefore) !== inlineValue(sc.altAfter)) {
+          lines.push(`  - alt: ${beforeAfter(sc.altBefore, sc.altAfter)}`);
+        }
+        if (inlineValue(sc.captionBefore) !== inlineValue(sc.captionAfter)) {
+          lines.push(`  - caption: ${beforeAfter(sc.captionBefore, sc.captionAfter)}`);
+        }
+      }
     }
     lines.push('');
   }

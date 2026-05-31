@@ -1,15 +1,19 @@
 import { getBlob } from './db';
 import {
+  genChangeReportMarkdown,
   genLatestKnownFile,
   genMetaFile,
   genProposalMarkdown,
   genReviewRemarksMarkdown,
   genVersionFileDiff,
   genVersionFileNewTool,
+  type FeatureChange,
   type GenFeatureSupport,
   type GenScreenshot,
   type ProposalSummary,
   type ReviewRemark,
+  type ScreenshotChange,
+  type TextChange,
 } from './codegen';
 import { blobEntry, makeSplitZips, textEntry, type ZipEntry } from './zip';
 import type { ContributionDraft, DraftFeatureSupport } from './types';
@@ -75,6 +79,59 @@ function hasChanged(fs: DraftFeatureSupport): boolean {
     norm(fs.sourceExtract) !== norm(base.sourceExtract) ||
     screenshotsChanged(fs)
   );
+}
+
+// Text fields that moved vs the baseline, for the clipboard change report.
+function collectTextChanges(fs: DraftFeatureSupport): TextChange[] {
+  const base = fs.inherited;
+  if (!base) return [];
+  const out: TextChange[] = [];
+  if (fs.support !== base.support) {
+    out.push({ field: 'support', before: base.support, after: fs.support });
+  }
+  if (norm(fs.note) !== norm(base.note)) {
+    out.push({ field: 'note', before: base.note, after: fs.note });
+  }
+  if (norm(fs.sourceUrl) !== norm(base.sourceUrl)) {
+    out.push({ field: 'source URL', before: base.sourceUrl, after: fs.sourceUrl });
+  }
+  if (norm(fs.sourceExtract) !== norm(base.sourceExtract)) {
+    out.push({ field: 'source extract', before: base.sourceExtract, after: fs.sourceExtract });
+  }
+  return out;
+}
+
+// Screenshots added / removed / re-captioned vs the baseline, for the report.
+function collectScreenshotChanges(toolId: string, fs: DraftFeatureSupport): ScreenshotChange[] {
+  const out: ScreenshotChange[] = [];
+  for (const s of fs.screenshots) {
+    if (!s.inherited) {
+      // Freshly attached (baseline shots always carry `inherited`).
+      out.push({
+        kind: 'added',
+        ref: s.baselineSrc ?? screenshotSrc(toolId, s.filename),
+        altAfter: s.alt,
+        captionAfter: s.caption,
+      });
+    } else if (s.removed) {
+      out.push({
+        kind: 'removed',
+        ref: s.inherited.src,
+        altBefore: s.inherited.alt,
+        captionBefore: s.inherited.caption,
+      });
+    } else if (norm(s.alt) !== norm(s.inherited.alt) || norm(s.caption) !== norm(s.inherited.caption)) {
+      out.push({
+        kind: 'edited',
+        ref: s.inherited.src,
+        altBefore: s.inherited.alt,
+        altAfter: s.alt,
+        captionBefore: s.inherited.caption,
+        captionAfter: s.caption,
+      });
+    }
+  }
+  return out;
 }
 
 /** One downloadable ZIP file. A bundle that fits under the GitHub attachment
@@ -204,7 +261,29 @@ export async function buildProposal(
     }))
     .filter((r) => r.remark);
   const remarksMarkdown = genReviewRemarksMarkdown(remarks);
-  const clipboardMarkdown = remarksMarkdown ? `${markdown}\n${remarksMarkdown}` : markdown;
+
+  // Change report — new-version only: a per-feature list of edited text and
+  // added/removed screenshots vs the baseline, so the diff is readable at a
+  // glance without scanning the generated override .ts. Clipboard-only, like
+  // the remarks: it is review context, not dataset content.
+  let changeReportMarkdown = '';
+  if (draft.mode === 'new-version') {
+    const changes: FeatureChange[] = ordered
+      .map((fs) => ({
+        featureId: fs.featureId,
+        label: featureLabels[fs.featureId],
+        textChanges: collectTextChanges(fs),
+        screenshotChanges: collectScreenshotChanges(toolId, fs),
+      }))
+      .filter((c) => c.textChanges.length > 0 || c.screenshotChanges.length > 0);
+    changeReportMarkdown = genChangeReportMarkdown(changes, draft.baseVersion ?? 'baseline');
+  }
+
+  // Assemble the clipboard body: PROPOSAL.md, then the change report, then the
+  // author remarks — skipping any empty section so spacing stays clean.
+  const clipboardMarkdown = [markdown, changeReportMarkdown, remarksMarkdown]
+    .filter((section) => section.trim())
+    .join('\n');
 
   // Split the bundle when a single ZIP would breach the GitHub attachment limit;
   // screenshots are spread across parts, the text files all stay in part 1.
