@@ -255,7 +255,19 @@
   async function resumeDraft(id: string) {
     const loaded = await loadDraft(id);
     if (!loaded) return;
+    // Backfill feature entries added to the catalog after this draft was first
+    // created: the features step iterates the current `features` list, so a
+    // missing `draft.features[id]` would crash setSupport/setField. New entries
+    // start empty (no baseline to inherit — the draft predates the feature).
+    let backfilled = false;
+    for (const f of features) {
+      if (!loaded.features[f.id]) {
+        loaded.features[f.id] = emptyFeature(f.id);
+        backfilled = true;
+      }
+    }
     draft = loaded;
+    if (backfilled) await persist();
     // Rebuild previews from the stored blobs.
     for (const fs of Object.values(loaded.features)) {
       for (const shot of fs.screenshots) {
@@ -343,16 +355,32 @@
 
   // ----- features step ------------------------------------------------------
 
+  // The draft state for the feature on screen, created on the fly if missing —
+  // a draft started before this feature joined the catalog has no entry for it,
+  // and the features step iterates the *current* catalog. Self-heals mid-session
+  // (resumeDraft already backfills on load).
+  function featureState(): DraftFeatureSupport | undefined {
+    if (!draft || !currentFeature) return undefined;
+    let fs = draft.features[currentFeature.id];
+    if (!fs) {
+      fs = emptyFeature(currentFeature.id);
+      draft.features[currentFeature.id] = fs;
+    }
+    return fs;
+  }
+
   function setSupport(value: SupportLevel) {
-    if (!draft || !currentFeature) return;
-    draft.features[currentFeature.id].support = value;
-    draft.features[currentFeature.id].reviewed = true;
+    const fs = featureState();
+    if (!fs) return;
+    fs.support = value;
+    fs.reviewed = true;
     void persist();
   }
 
   function setField(field: 'note' | 'sourceUrl' | 'sourceExtract' | 'reviewRemark', value: string) {
-    if (!draft || !currentFeature) return;
-    (draft.features[currentFeature.id] as any)[field] = value;
+    const fs = featureState();
+    if (!fs) return;
+    (fs as any)[field] = value;
     void persist();
   }
 
@@ -717,8 +745,17 @@
     }
   }
 
-  function doDownload() {
-    if (built) downloadBlob(built.zip, built.filename);
+  function doDownloadPart(part: { blob: Blob; filename: string }) {
+    downloadBlob(part.blob, part.filename);
+  }
+
+  // Fire each part with a small stagger — browsers throttle or block several
+  // synchronous programmatic downloads in a row.
+  function doDownloadAll() {
+    if (!built) return;
+    built.parts.forEach((part, i) => {
+      setTimeout(() => downloadBlob(part.blob, part.filename), i * 400);
+    });
   }
 
   async function doCopyMarkdown() {
@@ -1163,13 +1200,36 @@
             {#if draft.mode === 'new-version'}· {built.changedCount} changed feature(s){/if}
             {#if built.remarkCount > 0}· {built.remarkCount} review remark(s){/if}.
           </p>
-          <div class="contrib__actions contrib__actions--start">
-            <button type="button" on:click={doDownload}>⬇ Download ZIP</button>
-            <button type="button" class="contrib__ghost" on:click={doCopyMarkdown}>{copiedMd ? '✓ Copied' : 'Copy summary (Markdown)'}</button>
-            <a class="contrib__ghost contrib__linkbtn" href={built.issueUrl} target="_blank" rel="noreferrer">Open GitHub issue ↗</a>
-          </div>
+          {#if built.parts.length > 1}
+            <div class="contrib__warn" role="status">
+              <strong>⚠ Split into {built.parts.length} ZIPs.</strong>
+              The bundle was over GitHub's 25 MB attachment limit, so the screenshots were
+              spread across {built.parts.length} parts. Download and attach <strong>all</strong> of them
+              to the issue — each part unzips at the repo root and they complement each other.
+            </div>
+            <div class="contrib__actions contrib__actions--start">
+              <button type="button" on:click={doDownloadAll}>⬇ Download all {built.parts.length} ZIPs</button>
+            </div>
+            <ul class="contrib__partlist">
+              {#each built.parts as part}
+                <li>
+                  <button type="button" class="contrib__ghost" on:click={() => doDownloadPart(part)}>⬇ {part.filename}</button>
+                </li>
+              {/each}
+            </ul>
+            <div class="contrib__actions contrib__actions--start">
+              <button type="button" class="contrib__ghost" on:click={doCopyMarkdown}>{copiedMd ? '✓ Copied' : 'Copy summary (Markdown)'}</button>
+              <a class="contrib__ghost contrib__linkbtn" href={built.issueUrl} target="_blank" rel="noreferrer">Open GitHub issue ↗</a>
+            </div>
+          {:else}
+            <div class="contrib__actions contrib__actions--start">
+              <button type="button" on:click={() => doDownloadPart(built.parts[0])}>⬇ Download ZIP</button>
+              <button type="button" class="contrib__ghost" on:click={doCopyMarkdown}>{copiedMd ? '✓ Copied' : 'Copy summary (Markdown)'}</button>
+              <a class="contrib__ghost contrib__linkbtn" href={built.issueUrl} target="_blank" rel="noreferrer">Open GitHub issue ↗</a>
+            </div>
+          {/if}
           <p class="contrib__muted">
-            Unzip at the repo root, then open the issue and paste the copied summary into the
+            Unzip {built.parts.length > 1 ? 'all parts' : ''} at the repo root, then open the issue and paste the copied summary into the
             "Generated payload" field (and drag the screenshots in if you like).
             {#if built.remarkCount > 0}
               The copied summary includes your {built.remarkCount} review remark(s); the ZIP does not.
@@ -1392,6 +1452,8 @@
   .contrib__del { min-height: 26px; min-width: 26px; padding: 0; border: 1px solid var(--border); background: var(--bg-row); color: var(--fg-muted); border-radius: var(--radius-sm); margin-left: auto; }
 
   .contrib__result { margin-top: 18px; border-top: 1px solid var(--border-soft); padding-top: 14px; }
+  .contrib__partlist { list-style: none; margin: 10px 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+  .contrib__partlist button { font-variant-numeric: tabular-nums; }
   .contrib__warn {
     margin: 0; padding: 12px 14px; border-radius: var(--radius-md);
     border: 1px solid var(--cell-partial); border-left-width: 4px;
