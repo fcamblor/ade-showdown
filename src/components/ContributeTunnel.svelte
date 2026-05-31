@@ -406,7 +406,8 @@
     if (!draft || !currentFeature) return;
     const images = files.filter((f) => f.type.startsWith('image/'));
     if (images.length === 0) return;
-    const fs = draft.features[currentFeature.id];
+    const fs = featureState();
+    if (!fs) return;
     for (const file of images) {
       const n = nextUsedIndex(fs);
       const id = uuid();
@@ -527,8 +528,8 @@
   }
 
   async function removeScreenshot(shotId: string) {
-    if (!draft || !currentFeature) return;
-    const fs = draft.features[currentFeature.id];
+    const fs = featureState();
+    if (!fs) return;
     const shot = fs.screenshots.find((s) => s.id === shotId);
     if (!shot) return;
     if (shot.inherited) {
@@ -551,8 +552,8 @@
   }
 
   function restoreScreenshot(shotId: string) {
-    if (!draft || !currentFeature) return;
-    const fs = draft.features[currentFeature.id];
+    const fs = featureState();
+    if (!fs) return;
     const shot = fs.screenshots.find((s) => s.id === shotId);
     if (!shot) return;
     shot.removed = false;
@@ -561,8 +562,8 @@
   }
 
   function setShotMeta(shotId: string, field: 'alt' | 'caption', value: string) {
-    if (!draft || !currentFeature) return;
-    const fs = draft.features[currentFeature.id];
+    const fs = featureState();
+    if (!fs) return;
     const shot = fs.screenshots.find((s) => s.id === shotId);
     if (!shot) return;
     shot[field] = value;
@@ -673,7 +674,8 @@
   }
 
   function goNext() {
-    if (draft && currentFeature) draft.features[currentFeature.id].reviewed = true;
+    const fs = featureState();
+    if (fs) fs.reviewed = true;
     void persist();
     if (atLast) step = 'review';
     else currentIndex += 1;

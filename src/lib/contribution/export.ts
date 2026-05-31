@@ -11,10 +11,15 @@ import {
   type ProposalSummary,
   type ReviewRemark,
 } from './codegen';
-import { blobEntry, makeZip, textEntry, type ZipEntry } from './zip';
+import { blobEntry, makeSplitZips, textEntry, type ZipEntry } from './zip';
 import type { ContributionDraft, DraftFeatureSupport } from './types';
 
 const REPO = 'fcamblor/ade-arena';
+
+// GitHub rejects issue attachments above 25 MB. We cap each produced ZIP below
+// that to keep headroom, splitting the screenshots across several parts when a
+// single bundle would exceed it.
+const MAX_PART_BYTES = 22 * 1024 * 1024;
 
 function norm(value: string | undefined): string | undefined {
   const trimmed = value?.trim();
@@ -72,8 +77,20 @@ function hasChanged(fs: DraftFeatureSupport): boolean {
   );
 }
 
+/** One downloadable ZIP file. A bundle that fits under the GitHub attachment
+ * limit yields a single part; a larger one is split into several. */
+export type ProposalPart = {
+  blob: Blob;
+  filename: string;
+};
+
 export type BuiltProposal = {
-  zip: Blob;
+  /**
+   * The ZIP(s) to download. Usually one, but split into several parts (with the
+   * screenshots spread across them) when a single ZIP would exceed GitHub's
+   * 25 MB attachment limit. The text files (PROPOSAL.md + data) ride in part 1.
+   */
+  parts: ProposalPart[];
   /** Summary shipped inside the ZIP (PROPOSAL.md). Never carries review remarks. */
   markdown: string;
   /**
@@ -82,7 +99,6 @@ export type BuiltProposal = {
    * separate from `markdown` so the remarks stay out of the exported ZIP.
    */
   clipboardMarkdown: string;
-  filename: string;
   issueUrl: string;
   changedCount: number;
   screenshotCount: number;
@@ -107,17 +123,21 @@ export async function buildProposal(
   const allGen = ordered.map((fs) => toGenFeatureSupport(toolId, fs));
   const changedFeatureIds: string[] = ordered.filter(hasChanged).map((fs) => fs.featureId);
 
-  const entries: ZipEntry[] = [];
+  // Text files (PROPOSAL.md + data) are tiny and ride together in the first ZIP
+  // part; the screenshots are the only large entries and get spread across parts
+  // when the bundle would otherwise exceed GitHub's attachment limit.
+  const dataEntries: ZipEntry[] = [];
+  const screenshotEntries: ZipEntry[] = [];
   const dir = `src/data/orchestrators/${toolId}`;
   const versionFile = `${dir}/${draft.version}.ts`;
 
   if (draft.mode === 'new-tool') {
-    entries.push(textEntry(`${dir}/_meta.ts`, genMetaFile(draft.meta)));
-    entries.push(textEntry(`${dir}/_latest-known-features.ts`, genLatestKnownFile(allGen)));
-    entries.push(textEntry(versionFile, genVersionFileNewTool(draft.version, draft.releaseDate)));
+    dataEntries.push(textEntry(`${dir}/_meta.ts`, genMetaFile(draft.meta)));
+    dataEntries.push(textEntry(`${dir}/_latest-known-features.ts`, genLatestKnownFile(allGen)));
+    dataEntries.push(textEntry(versionFile, genVersionFileNewTool(draft.version, draft.releaseDate)));
   } else {
     const overrides = allGen.filter((g) => changedFeatureIds.includes(g.featureId));
-    entries.push(
+    dataEntries.push(
       textEntry(
         versionFile,
         genVersionFileDiff(
@@ -139,7 +159,9 @@ export async function buildProposal(
       if (shot.baselineSrc || shot.removed) continue;
       const blob = await getBlob(shot.id);
       if (!blob) continue;
-      entries.push(await blobEntry(`public/screenshots/${toolId}/${shot.filename}`, blob));
+      screenshotEntries.push(
+        await blobEntry(`public/screenshots/${toolId}/${shot.filename}`, blob),
+      );
       screenshotCount += 1;
     }
   }
@@ -169,7 +191,8 @@ export async function buildProposal(
   };
   const markdown = genProposalMarkdown(summary);
   // PROPOSAL.md ships inside the ZIP — deliberately without the review remarks.
-  entries.unshift(textEntry('PROPOSAL.md', markdown));
+  // It leads the anchor entries so it lands in the first part.
+  const anchorEntries: ZipEntry[] = [textEntry('PROPOSAL.md', markdown), ...dataEntries];
 
   // Review remarks are review metadata, not dataset content: they are appended
   // only to the clipboard Markdown (the GitHub issue body), never to the ZIP.
@@ -183,11 +206,20 @@ export async function buildProposal(
   const remarksMarkdown = genReviewRemarksMarkdown(remarks);
   const clipboardMarkdown = remarksMarkdown ? `${markdown}\n${remarksMarkdown}` : markdown;
 
+  // Split the bundle when a single ZIP would breach the GitHub attachment limit;
+  // screenshots are spread across parts, the text files all stay in part 1.
+  const blobs = makeSplitZips(anchorEntries, screenshotEntries, MAX_PART_BYTES);
+  const base = `${toolId}-${draft.version}-proposal`;
+  const parts: ProposalPart[] = blobs.map((blob, i) => ({
+    blob,
+    filename:
+      blobs.length === 1 ? `${base}.zip` : `${base}-part${i + 1}of${blobs.length}.zip`,
+  }));
+
   return {
-    zip: makeZip(entries),
+    parts,
     markdown,
     clipboardMarkdown,
-    filename: `${toolId}-${draft.version}-proposal.zip`,
     issueUrl: buildIssueUrl(draft),
     changedCount: changedFeatureIds.length,
     screenshotCount,

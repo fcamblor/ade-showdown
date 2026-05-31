@@ -176,7 +176,10 @@ mismatch (❌) in the report.
 The tunnel produces a ZIP (`<toolId>-<version>-proposal.zip`) containing
 `PROPOSAL.md`, the `src/data/orchestrators/<toolId>/…` files, and
 `public/screenshots/<toolId>/…`. The author either attaches that ZIP or drags
-the individual screenshots in.
+the individual screenshots in. When the bundle exceeds GitHub's 25 MB
+attachment limit the tunnel splits it into several parts
+(`<toolId>-<version>-proposal-part1of3.zip`, `…-part2of3.zip`, …) with the
+screenshots spread across them; the author then attaches **all** parts.
 
 1. Scan the issue body **and every comment** for attachment URLs
    (`https://github.com/user-attachments/...`, `.../assets/...`,
@@ -185,7 +188,11 @@ the individual screenshots in.
 3. Download each attachment with `curl -L -o <dest> "<url>"` (public repo: works
    anonymously; private: add `-H "Authorization: token $(gh auth token)"`).
 4. If a `.zip` is present, unzip it into `.context/contrib-<N>/zip/`. This yields
-   the canonical `PROPOSAL.md`, the data file(s), and the screenshots.
+   the canonical `PROPOSAL.md`, the data file(s), and the screenshots. Unzip
+   **every** `.zip` found into the same dir — a split bundle (`…-partNofM.zip`)
+   has its parts complement each other, so merging them reconstructs the whole.
+   If parts are missing (you see `partNofM` names but not all `M`), ask the
+   author to re-attach the missing ones before continuing.
 5. If **no ZIP and no screenshots** could be retrieved, ask the user (via
    `AskUserQuestion`, free-form) for the **local path** to the ZIP they exported
    — the tunnel just produced it on their machine. Unzip that.
