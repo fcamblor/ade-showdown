@@ -7,7 +7,7 @@ export const LATEST_KNOWN_FEATURES: FeatureSupport[] = [
   {
     featureId: 'sandbox-isolation',
     support: 'no',
-    note: 'No orchestrator-managed sandbox: the desktop app launches Claude Code with the host user’s permissions. Any per-tool confinement is whatever Claude Code itself exposes.',
+    note: 'No orchestrator-managed sandbox: the desktop app runs Claude Code with the host user’s permissions. The system prompt does include claims telling the session not to modify files outside its worktree, but that is a prompt-level guardrail, not enforced isolation.',
     screenshots: [],
   },
   {
