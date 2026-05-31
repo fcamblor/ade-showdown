@@ -30,8 +30,6 @@ body:
           required: true
         - label: I attached the exported ZIP (or dragged its screenshots) to this issue.
           required: true
-        - label: Every screenshot I included has alt text.
-          required: true
         - label: I consent to making public any information visible in the screenshots I attached (this issue and its attachments are publicly accessible).
           required: true
 
