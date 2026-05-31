@@ -121,3 +121,52 @@ export function makeZip(entries: ZipEntry[]): Blob {
   }
   return new Blob([combined], { type: 'application/zip' });
 }
+
+// Bytes the EOCD record adds to every ZIP.
+const EOCD_SIZE = 22;
+
+// Footprint an entry adds to a ZIP under STORE: local header (30) + name, plus
+// the central directory record (46) + name, plus the raw data. Lets us bin-pack
+// before building any ZIP, so we never serialise a part only to discover it is
+// too big.
+function entryFootprint(entry: ZipEntry): number {
+  const nameLen = encoder.encode(entry.path).length;
+  return 30 + nameLen + entry.data.length + 46 + nameLen;
+}
+
+// Pack entries into one or more ZIP Blobs, each kept under `maxBytes` when
+// possible. `anchorEntries` (the small text files) all land in the first ZIP;
+// `splittableEntries` (the screenshots) are spread first-fit-decreasing so every
+// part stays under the cap. A lone entry larger than the cap gets its own ZIP
+// (best effort — nothing more can be done without re-encoding it). The common
+// case (everything fits) returns a single ZIP in the original entry order.
+export function makeSplitZips(
+  anchorEntries: ZipEntry[],
+  splittableEntries: ZipEntry[],
+  maxBytes: number,
+): Blob[] {
+  const anchorFootprint = anchorEntries.reduce((sum, e) => sum + entryFootprint(e), 0);
+  const splittableFootprint = splittableEntries.reduce((sum, e) => sum + entryFootprint(e), 0);
+
+  if (EOCD_SIZE + anchorFootprint + splittableFootprint <= maxBytes) {
+    return [makeZip([...anchorEntries, ...splittableEntries])];
+  }
+
+  type Bin = { entries: ZipEntry[]; used: number };
+  const bins: Bin[] = [{ entries: [...anchorEntries], used: EOCD_SIZE + anchorFootprint }];
+
+  // Largest-first improves packing density and keeps the part count low.
+  const sorted = [...splittableEntries].sort((a, b) => entryFootprint(b) - entryFootprint(a));
+  for (const entry of sorted) {
+    const footprint = entryFootprint(entry);
+    const target = bins.find((bin) => bin.used + footprint <= maxBytes);
+    if (target) {
+      target.entries.push(entry);
+      target.used += footprint;
+    } else {
+      bins.push({ entries: [entry], used: EOCD_SIZE + footprint });
+    }
+  }
+
+  return bins.map((bin) => makeZip(bin.entries));
+}

@@ -1,4 +1,4 @@
-import type { FeatureId, Platform, SupportLevel } from '../../data/schema';
+import type { FeatureId, Platform, SupportLevel, TrackingSourceKind } from '../../data/schema';
 
 // Draft model for the in-browser "propose an orchestrator / version" tunnel.
 //
@@ -75,10 +75,33 @@ export type DraftFeatureSupport = {
   sourceUrl?: string;
   sourceExtract?: string;
   screenshots: DraftScreenshot[];
+  /**
+   * Free-form remark aimed at the maintainer reviewing the proposal — e.g. "the
+   * docs look stale, please re-scan and maybe add this URL to the ADE's source
+   * list". Deliberately NOT part of the persisted dataset: it never reaches the
+   * generated `.ts` files nor the export ZIP. It is appended (contextualised to
+   * this feature) to the Markdown copied to the clipboard, so it lands in the
+   * GitHub issue body to drive the review.
+   */
+  reviewRemark?: string;
   /** Present only in `new-version` mode — the latest-known baseline value. */
   inherited?: InheritedSupport;
   /** Set once the contributor has visited and confirmed this feature. */
   reviewed?: boolean;
+};
+
+// A source the dataset should watch to stay current on this ADE — its
+// changelog, release notes, GitHub releases/commits, docs, blog, RSS/Atom
+// feed, website, etc. Mirrors the editable fields of the schema's
+// `TrackingSource`. Captured by the tunnel in `new-tool` mode only; in
+// `new-version` mode the meta (and thus this list) is inherited from the
+// baseline and not re-authored here. The contribution review skill treats
+// this list as a starting point and completes it with a research pass.
+export type ContributionTrackingSource = {
+  kind: TrackingSourceKind;
+  label: string;
+  url: string;
+  notes?: string;
 };
 
 // Tool-level metadata. Mirrors the editable fields of `OrchestratorMeta`.
@@ -94,6 +117,12 @@ export type ContributionMeta = {
   codebase?: 'open-source' | 'proprietary';
   platforms: Platform[];
   modelRestriction?: string;
+  /**
+   * `new-tool` only: where to watch for future releases / feature changes.
+   * Optional and free-form — the maintainer (and the review skill's research
+   * pass) complete it before the data lands.
+   */
+  trackingSources?: ContributionTrackingSource[];
 };
 
 export type ContributionDraft = {

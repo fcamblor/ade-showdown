@@ -1,9 +1,10 @@
 <script lang="ts">
   import { onMount } from 'svelte';
-  import type { Platform, SupportLevel } from '../data/schema';
+  import type { Platform, SupportLevel, TrackingSourceKind } from '../data/schema';
   import type {
     ContributionDraft,
     ContributionMode,
+    ContributionTrackingSource,
     DraftFeatureSupport,
     DraftScreenshot,
     ToolBaseline,
@@ -53,6 +54,23 @@
     { value: 'linux', label: 'Linux' },
     { value: 'web', label: 'Web' },
   ];
+  // Tracking-source kinds mirror `TrackingSourceKindSchema` in src/data/schema.ts.
+  // These are the places the dataset watches to stay current on an ADE; the
+  // contribution review skill completes whatever the contributor leaves out.
+  const TRACKING_KIND_OPTIONS: { value: TrackingSourceKind; label: string }[] = [
+    { value: 'docs', label: 'Documentation' },
+    { value: 'changelog', label: 'Changelog' },
+    { value: 'release-notes', label: 'Release notes' },
+    { value: 'github-releases', label: 'GitHub releases' },
+    { value: 'github-commits', label: 'GitHub commits' },
+    { value: 'rss', label: 'RSS / Atom feed' },
+    { value: 'blog', label: 'Blog' },
+    { value: 'docs-diff', label: 'Docs diff' },
+    { value: 'discord', label: 'Discord' },
+    { value: 'twitter', label: 'X / Twitter' },
+    { value: 'youtube', label: 'YouTube' },
+    { value: 'other', label: 'Other (website, forum…)' },
+  ];
 
   type Step = 'start' | 'meta' | 'features' | 'review';
 
@@ -75,6 +93,11 @@
   let screenshotConsent = false;
 
   const orderedFeatureIds = features.map((f) => f.id);
+  // Feature id → human label, so review remarks read with their feature name in
+  // the clipboard summary that feeds the GitHub issue.
+  const featureLabels: Record<string, string> = Object.fromEntries(
+    features.map((f) => [f.id, f.label]),
+  );
 
   $: currentFeature = features[currentIndex];
   $: currentSupport = draft && currentFeature ? draft.features[currentFeature.id] : undefined;
@@ -232,7 +255,19 @@
   async function resumeDraft(id: string) {
     const loaded = await loadDraft(id);
     if (!loaded) return;
+    // Backfill feature entries added to the catalog after this draft was first
+    // created: the features step iterates the current `features` list, so a
+    // missing `draft.features[id]` would crash setSupport/setField. New entries
+    // start empty (no baseline to inherit — the draft predates the feature).
+    let backfilled = false;
+    for (const f of features) {
+      if (!loaded.features[f.id]) {
+        loaded.features[f.id] = emptyFeature(f.id);
+        backfilled = true;
+      }
+    }
     draft = loaded;
+    if (backfilled) await persist();
     // Rebuild previews from the stored blobs.
     for (const fs of Object.values(loaded.features)) {
       for (const shot of fs.screenshots) {
@@ -260,6 +295,32 @@
     if (!draft) return;
     draft.meta.toolName = value;
     if (draft.mode === 'new-tool') draft.meta.toolId = slugify(value);
+    void persist();
+  }
+
+  // ----- tracking sources (new-tool only) ----------------------------------
+  // The contributor lists where to watch for future releases of the ADE
+  // (changelog, release notes, GitHub releases/commits, docs, RSS, blog…). The
+  // review skill completes whatever is missing with a research pass.
+
+  function addTrackingSource() {
+    if (!draft) return;
+    const list = draft.meta.trackingSources ?? [];
+    draft.meta.trackingSources = [...list, { kind: 'changelog', label: '', url: '' }];
+    void persist();
+  }
+
+  function setTrackingField(index: number, field: keyof ContributionTrackingSource, value: string) {
+    if (!draft?.meta.trackingSources) return;
+    const next = [...draft.meta.trackingSources];
+    next[index] = { ...next[index], [field]: value };
+    draft.meta.trackingSources = next;
+    void persist();
+  }
+
+  function removeTrackingSource(index: number) {
+    if (!draft?.meta.trackingSources) return;
+    draft.meta.trackingSources = draft.meta.trackingSources.filter((_, i) => i !== index);
     void persist();
   }
 
@@ -294,16 +355,32 @@
 
   // ----- features step ------------------------------------------------------
 
+  // The draft state for the feature on screen, created on the fly if missing —
+  // a draft started before this feature joined the catalog has no entry for it,
+  // and the features step iterates the *current* catalog. Self-heals mid-session
+  // (resumeDraft already backfills on load).
+  function featureState(): DraftFeatureSupport | undefined {
+    if (!draft || !currentFeature) return undefined;
+    let fs = draft.features[currentFeature.id];
+    if (!fs) {
+      fs = emptyFeature(currentFeature.id);
+      draft.features[currentFeature.id] = fs;
+    }
+    return fs;
+  }
+
   function setSupport(value: SupportLevel) {
-    if (!draft || !currentFeature) return;
-    draft.features[currentFeature.id].support = value;
-    draft.features[currentFeature.id].reviewed = true;
+    const fs = featureState();
+    if (!fs) return;
+    fs.support = value;
+    fs.reviewed = true;
     void persist();
   }
 
-  function setField(field: 'note' | 'sourceUrl' | 'sourceExtract', value: string) {
-    if (!draft || !currentFeature) return;
-    (draft.features[currentFeature.id] as any)[field] = value;
+  function setField(field: 'note' | 'sourceUrl' | 'sourceExtract' | 'reviewRemark', value: string) {
+    const fs = featureState();
+    if (!fs) return;
+    (fs as any)[field] = value;
     void persist();
   }
 
@@ -357,7 +434,8 @@
     if (!draft || !currentFeature) return;
     const images = files.filter((f) => f.type.startsWith('image/'));
     if (images.length === 0) return;
-    const fs = draft.features[currentFeature.id];
+    const fs = featureState();
+    if (!fs) return;
     for (const file of images) {
       const n = nextUsedIndex(fs);
       const id = uuid();
@@ -393,16 +471,93 @@
     dragOver = false;
   }
 
+  // Collect every image carried by a DataTransfer (drop or paste). Inline
+  // screenshots dragged from apps like Skitch never reach `.files`; they only
+  // surface as `.items` of kind 'file' or as a `text/html`/`text/uri-list`
+  // payload pointing at the bitmap (often a data: URL). Read all string data
+  // synchronously here — a DataTransfer becomes inert after the first await.
+  function readImageSources(dt: DataTransfer): { files: File[]; urls: string[] } {
+    const files: File[] = [];
+    const urls: string[] = [];
+    // The same bitmap is usually mirrored in both `.files` and `.items` — key
+    // by identity to avoid registering one drop/paste as two screenshots.
+    const seen = new Set<string>();
+    const addFile = (f: File | null) => {
+      if (!f || !f.type.startsWith('image/')) return;
+      const key = `${f.name}:${f.size}:${f.lastModified}`;
+      if (seen.has(key)) return;
+      seen.add(key);
+      files.push(f);
+    };
+    if (dt.files) {
+      for (const f of Array.from(dt.files)) addFile(f);
+    }
+    if (dt.items) {
+      for (const it of Array.from(dt.items)) {
+        if (it.kind === 'file') addFile(it.getAsFile());
+      }
+    }
+    if (files.length === 0) {
+      const html = dt.getData('text/html');
+      const imgSrc = html?.match(/<img[^>]+src=["']([^"']+)["']/i)?.[1];
+      if (imgSrc) urls.push(imgSrc);
+      const uriList = dt.getData('text/uri-list');
+      if (uriList) {
+        for (const line of uriList.split(/\r?\n/)) {
+          const t = line.trim();
+          if (t && !t.startsWith('#')) urls.push(t);
+        }
+      }
+      const plain = dt.getData('text/plain')?.trim();
+      if (plain && (plain.startsWith('data:image/') || /^https?:\/\//i.test(plain))) {
+        urls.push(plain);
+      }
+    }
+    return { files, urls };
+  }
+
+  // Resolve image URLs (data: or http) extracted from a transfer into Files.
+  async function urlsToImageFiles(urls: string[]): Promise<File[]> {
+    const out: File[] = [];
+    for (const url of [...new Set(urls)]) {
+      try {
+        const res = await fetch(url);
+        if (!res.ok) continue;
+        const blob = await res.blob();
+        if (!blob.type.startsWith('image/')) continue;
+        out.push(new File([blob], 'pasted-image', { type: blob.type }));
+      } catch {
+        // Cross-origin or otherwise unreachable source: skip silently.
+      }
+    }
+    return out;
+  }
+
+  async function addFromTransfer(dt: DataTransfer | null): Promise<boolean> {
+    if (!dt) return false;
+    const { files, urls } = readImageSources(dt);
+    const resolved = await urlsToImageFiles(urls);
+    const all = [...files, ...resolved];
+    if (all.length === 0) return false;
+    await addFiles(all);
+    return true;
+  }
+
   async function onDrop(event: DragEvent) {
     event.preventDefault();
     dragOver = false;
-    const files = event.dataTransfer?.files;
-    if (files && files.length) await addFiles(Array.from(files));
+    await addFromTransfer(event.dataTransfer);
+  }
+
+  async function onPaste(event: ClipboardEvent) {
+    if (!draft || !currentFeature) return;
+    const added = await addFromTransfer(event.clipboardData);
+    if (added) event.preventDefault();
   }
 
   async function removeScreenshot(shotId: string) {
-    if (!draft || !currentFeature) return;
-    const fs = draft.features[currentFeature.id];
+    const fs = featureState();
+    if (!fs) return;
     const shot = fs.screenshots.find((s) => s.id === shotId);
     if (!shot) return;
     if (shot.inherited) {
@@ -425,8 +580,8 @@
   }
 
   function restoreScreenshot(shotId: string) {
-    if (!draft || !currentFeature) return;
-    const fs = draft.features[currentFeature.id];
+    const fs = featureState();
+    if (!fs) return;
     const shot = fs.screenshots.find((s) => s.id === shotId);
     if (!shot) return;
     shot.removed = false;
@@ -435,8 +590,8 @@
   }
 
   function setShotMeta(shotId: string, field: 'alt' | 'caption', value: string) {
-    if (!draft || !currentFeature) return;
-    const fs = draft.features[currentFeature.id];
+    const fs = featureState();
+    if (!fs) return;
     const shot = fs.screenshots.find((s) => s.id === shotId);
     if (!shot) return;
     shot[field] = value;
@@ -547,7 +702,8 @@
   }
 
   function goNext() {
-    if (draft && currentFeature) draft.features[currentFeature.id].reviewed = true;
+    const fs = featureState();
+    if (fs) fs.reviewed = true;
     void persist();
     if (atLast) step = 'review';
     else currentIndex += 1;
@@ -581,7 +737,7 @@
     busy = true;
     error = '';
     try {
-      built = await buildProposal(draft, orderedFeatureIds);
+      built = await buildProposal(draft, orderedFeatureIds, featureLabels);
     } catch (err) {
       error = err instanceof Error ? err.message : 'Failed to build the proposal.';
     } finally {
@@ -589,13 +745,22 @@
     }
   }
 
-  function doDownload() {
-    if (built) downloadBlob(built.zip, built.filename);
+  function doDownloadPart(part: { blob: Blob; filename: string }) {
+    downloadBlob(part.blob, part.filename);
+  }
+
+  // Fire each part with a small stagger — browsers throttle or block several
+  // synchronous programmatic downloads in a row.
+  function doDownloadAll() {
+    if (!built) return;
+    built.parts.forEach((part, i) => {
+      setTimeout(() => downloadBlob(part.blob, part.filename), i * 400);
+    });
   }
 
   async function doCopyMarkdown() {
     if (!built) return;
-    copiedMd = await copyToClipboard(built.markdown);
+    copiedMd = await copyToClipboard(built.clipboardMarkdown);
     if (copiedMd) setTimeout(() => (copiedMd = false), 2500);
   }
 </script>
@@ -736,6 +901,46 @@
             </label>
           {/each}
         </fieldset>
+
+        <div class="contrib__tracking">
+          <div class="contrib__tracking-head">
+            <div>
+              <span class="contrib__tracking-title">Tracking sources <em>(optional)</em></span>
+              <p class="contrib__tracking-hint">
+                Where should we watch for future releases of this ADE? Add its changelog, release
+                notes, GitHub releases/commits, docs, RSS/Atom feed, blog… A maintainer completes
+                whatever you leave out, so even one or two links help.
+              </p>
+            </div>
+            <button type="button" class="contrib__ghost contrib__tracking-add" on:click={addTrackingSource}>+ Add source</button>
+          </div>
+          {#each draft.meta.trackingSources ?? [] as src, i (i)}
+            <div class="contrib__tracking-row">
+              <select
+                aria-label="Source kind"
+                value={src.kind}
+                on:change={(e) => setTrackingField(i, 'kind', e.currentTarget.value)}
+              >
+                {#each TRACKING_KIND_OPTIONS as opt}
+                  <option value={opt.value}>{opt.label}</option>
+                {/each}
+              </select>
+              <input
+                type="text"
+                placeholder="Label (e.g. Conductor changelog)"
+                value={src.label}
+                on:input={(e) => setTrackingField(i, 'label', e.currentTarget.value)}
+              />
+              <input
+                type="url"
+                placeholder="https://…"
+                value={src.url}
+                on:input={(e) => setTrackingField(i, 'url', e.currentTarget.value)}
+              />
+              <button type="button" class="contrib__del" on:click={() => removeTrackingSource(i)} aria-label="Remove tracking source">✕</button>
+            </div>
+          {/each}
+        </div>
       {:else}
         <p class="contrib__muted">
           Metadata inherited from {draft.meta.toolName} {draft.baseVersion}. Adjust the version and
@@ -765,6 +970,7 @@
         <p class="contrib__eyebrow">
           {currentFeature.category}
           {#if changedFromBaseline(currentSupport)}<span class="contrib__badge">changed</span>{/if}
+          {#if currentSupport?.reviewRemark?.trim()}<span class="contrib__badge contrib__badge--remark">remark</span>{/if}
         </p>
         {#if hasProof}
           {#key proofKey}
@@ -859,7 +1065,7 @@
         </div>
         <label class="contrib__dropzone">
           <input type="file" accept="image/*" multiple on:change={onFiles} />
-          <span>{dragOver ? 'Drop images here' : 'Drag & drop screenshots here, or click to browse'}</span>
+          <span>{dragOver ? 'Drop images here' : 'Drag & drop or paste screenshots here, or click to browse'}</span>
         </label>
         {#if (currentSupport?.screenshots?.filter(isUserAdded).length ?? 0) > 0}
           <p class="contrib__warn" role="alert">
@@ -922,6 +1128,25 @@
         {/each}
       </div>
 
+      <div class="contrib__remark">
+        <label>
+          <span class="contrib__remark-head">
+            Review remark
+            <em>for the reviewer — not exported</em>
+          </span>
+          <textarea
+            rows="3"
+            placeholder="e.g. the docs look stale on this feature — please re-scan and maybe add https://… to this ADE's source list before merging."
+            value={currentSupport?.reviewRemark ?? ''}
+            on:input={(e) => setField('reviewRemark', e.currentTarget.value)}
+          ></textarea>
+        </label>
+        <p class="contrib__remark-hint">
+          Kept out of the ZIP and the dataset. Copied (under this feature) into the summary you paste
+          in the GitHub issue, so a maintainer knows what to double-check.
+        </p>
+      </div>
+
       <div class="contrib__actions">
         <button type="button" class="contrib__ghost" on:click={goPrev}>← Previous</button>
         <button type="button" class="contrib__ghost" on:click={() => (step = 'review')}>Skip to export</button>
@@ -972,16 +1197,43 @@
         <div class="contrib__result">
           <p>
             Bundle ready: {built.screenshotCount} screenshot(s)
-            {#if draft.mode === 'new-version'}· {built.changedCount} changed feature(s){/if}.
+            {#if draft.mode === 'new-version'}· {built.changedCount} changed feature(s){/if}
+            {#if built.remarkCount > 0}· {built.remarkCount} review remark(s){/if}.
           </p>
-          <div class="contrib__actions contrib__actions--start">
-            <button type="button" on:click={doDownload}>⬇ Download ZIP</button>
-            <button type="button" class="contrib__ghost" on:click={doCopyMarkdown}>{copiedMd ? '✓ Copied' : 'Copy summary (Markdown)'}</button>
-            <a class="contrib__ghost contrib__linkbtn" href={built.issueUrl} target="_blank" rel="noreferrer">Open GitHub issue ↗</a>
-          </div>
+          {#if built.parts.length > 1}
+            <div class="contrib__warn" role="status">
+              <strong>⚠ Split into {built.parts.length} ZIPs.</strong>
+              The bundle was over GitHub's 25 MB attachment limit, so the screenshots were
+              spread across {built.parts.length} parts. Download and attach <strong>all</strong> of them
+              to the issue — each part unzips at the repo root and they complement each other.
+            </div>
+            <div class="contrib__actions contrib__actions--start">
+              <button type="button" on:click={doDownloadAll}>⬇ Download all {built.parts.length} ZIPs</button>
+            </div>
+            <ul class="contrib__partlist">
+              {#each built.parts as part}
+                <li>
+                  <button type="button" class="contrib__ghost" on:click={() => doDownloadPart(part)}>⬇ {part.filename}</button>
+                </li>
+              {/each}
+            </ul>
+            <div class="contrib__actions contrib__actions--start">
+              <button type="button" class="contrib__ghost" on:click={doCopyMarkdown}>{copiedMd ? '✓ Copied' : 'Copy summary (Markdown)'}</button>
+              <a class="contrib__ghost contrib__linkbtn" href={built.issueUrl} target="_blank" rel="noreferrer">Open GitHub issue ↗</a>
+            </div>
+          {:else}
+            <div class="contrib__actions contrib__actions--start">
+              <button type="button" on:click={() => doDownloadPart(built.parts[0])}>⬇ Download ZIP</button>
+              <button type="button" class="contrib__ghost" on:click={doCopyMarkdown}>{copiedMd ? '✓ Copied' : 'Copy summary (Markdown)'}</button>
+              <a class="contrib__ghost contrib__linkbtn" href={built.issueUrl} target="_blank" rel="noreferrer">Open GitHub issue ↗</a>
+            </div>
+          {/if}
           <p class="contrib__muted">
-            Unzip at the repo root, then open the issue and paste the copied summary into the
+            Unzip {built.parts.length > 1 ? 'all parts' : ''} at the repo root, then open the issue and paste the copied summary into the
             "Generated payload" field (and drag the screenshots in if you like).
+            {#if built.remarkCount > 0}
+              The copied summary includes your {built.remarkCount} review remark(s); the ZIP does not.
+            {/if}
           </p>
         </div>
       {/if}
@@ -1017,7 +1269,7 @@
   </div>
 {/if}
 
-<svelte:window on:keydown={onLightboxKey} />
+<svelte:window on:keydown={onLightboxKey} on:paste={onPaste} />
 
 <style>
   .contrib { max-width: min(900px, 100%); margin: 0 auto; display: grid; gap: 16px; }
@@ -1086,6 +1338,16 @@
   .contrib__check input, .contrib__upload input { accent-color: var(--accent); }
   .contrib__upload input { display: none; }
 
+  /* Tracking sources — the contributor's watch list for future releases. */
+  .contrib__tracking { margin-top: 16px; border: 1px solid var(--border); border-radius: var(--radius-md); padding: 12px 14px; display: grid; gap: 10px; }
+  .contrib__tracking-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+  .contrib__tracking-title { font-weight: 700; color: var(--fg-soft); font-size: 0.85rem; }
+  .contrib__tracking-title em { color: var(--fg-muted); font-style: normal; }
+  .contrib__tracking-hint { margin: 4px 0 0; color: var(--fg-muted); font-size: 0.78rem; line-height: 1.45; }
+  .contrib__tracking-add { min-height: 34px; padding: 6px 12px; font-size: 0.8rem; flex: none; }
+  .contrib__tracking-row { display: grid; grid-template-columns: minmax(120px, 0.7fr) 1fr 1.4fr auto; gap: 8px; align-items: center; }
+  @media (max-width: 560px) { .contrib__tracking-row { grid-template-columns: 1fr 1fr; } }
+
   .contrib__support { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
   .contrib__toggle {
     display: inline-flex; align-items: center; gap: 8px;
@@ -1117,6 +1379,18 @@
   .contrib__verdict--partial { color: var(--cell-partial-ink); }
   .contrib__verdict--unknown { color: var(--cell-unknown-ink); }
   .contrib__verdict .contrib__glyph { font-size: 1rem; }
+
+  /* Review remark — visually set apart from the data fields so it reads as a
+     note to the maintainer that never ships in the export. */
+  .contrib__remark {
+    margin-top: 16px; padding: 12px 14px; display: grid; gap: 6px;
+    border: 1px dashed var(--border-strong); border-radius: var(--radius-md);
+    background: color-mix(in oklch, var(--accent) 5%, var(--bg-row));
+  }
+  .contrib__remark label { display: grid; gap: 4px; font-size: 0.85rem; color: var(--fg-soft); }
+  .contrib__remark-head { display: flex; align-items: baseline; gap: 8px; font-weight: 700; }
+  .contrib__remark-head em { color: var(--fg-muted); font-style: normal; font-weight: 600; font-size: 0.78rem; }
+  .contrib__remark-hint { margin: 0; color: var(--fg-muted); font-size: 0.78rem; line-height: 1.45; }
 
   .contrib__shots { margin-top: 18px; border-top: 1px solid var(--border-soft); padding-top: 14px; display: grid; gap: 12px; border-radius: var(--radius-md); transition: background 140ms ease; }
   .contrib__shots--drag { background: color-mix(in oklch, var(--accent) 12%, transparent); outline: 2px dashed var(--accent); outline-offset: 4px; }
@@ -1168,6 +1442,7 @@
   .contrib__bar { height: 8px; border-radius: 999px; background: var(--bg-row); overflow: hidden; border: 1px solid var(--border); }
   .contrib__bar i { display: block; height: 100%; background: var(--accent); transition: width 280ms ease; }
   .contrib__badge { display: inline-block; margin-left: 8px; padding: 2px 8px; border-radius: 999px; background: color-mix(in oklch, var(--cell-partial) 40%, transparent); border: 1px solid var(--cell-partial); color: var(--cell-partial-ink); font-size: 0.7rem; letter-spacing: 0.1em; }
+  .contrib__badge--remark { background: color-mix(in oklch, var(--accent) 22%, transparent); border-color: var(--accent); color: var(--accent); }
 
   .contrib__drafts { margin-top: 22px; border-top: 1px solid var(--border-soft); padding-top: 14px; }
   .contrib__drafts ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
@@ -1177,6 +1452,8 @@
   .contrib__del { min-height: 26px; min-width: 26px; padding: 0; border: 1px solid var(--border); background: var(--bg-row); color: var(--fg-muted); border-radius: var(--radius-sm); margin-left: auto; }
 
   .contrib__result { margin-top: 18px; border-top: 1px solid var(--border-soft); padding-top: 14px; }
+  .contrib__partlist { list-style: none; margin: 10px 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+  .contrib__partlist button { font-variant-numeric: tabular-nums; }
   .contrib__warn {
     margin: 0; padding: 12px 14px; border-radius: var(--radius-md);
     border: 1px solid var(--cell-partial); border-left-width: 4px;
