@@ -44,8 +44,9 @@ export const LATEST_KNOWN_FEATURES: FeatureSupport[] = [
     screenshots: [] 
   },
   { featureId: 'live-logs', support: 'unknown', screenshots: [] },
-  { 
-    featureId: 'diff-viewer', 
+  { featureId: 'ui-commit', support: 'unknown', screenshots: [] },
+  {
+    featureId: 'diff-viewer',
     support: 'yes', 
     note: 'Built-in tools to inspect diffs and track Git state for the worktree.',
     screenshots: [] 

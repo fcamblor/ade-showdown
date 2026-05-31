@@ -108,6 +108,12 @@ export const LATEST_KNOWN_FEATURES: FeatureSupport[] = [
       'The run script launches your app, server, test watcher, or another long-running command from a workspace.',
   },
   {
+    featureId: 'ui-commit',
+    support: 'no',
+    note: 'No in-app commit surface; committing goes through the Diff Viewer → PR flow or an external Git client.',
+    screenshots: [],
+  },
+  {
     featureId: 'diff-viewer',
     support: 'yes',
     note: 'Built-in Diff Viewer renders agent-produced changes file by file, with inline comment and PR actions.',

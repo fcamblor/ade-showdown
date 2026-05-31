@@ -9,6 +9,7 @@ export const LATEST_KNOWN_FEATURES: FeatureSupport[] = [
   { featureId: 'pr-creation', support: 'yes', note: 'Agent Merge addresses review comments, fixes failing checks, and merges.', screenshots: [] },
   { featureId: 'visual-task-management', support: 'unknown', screenshots: [] },
   { featureId: 'live-logs', support: 'unknown', screenshots: [] },
+  { featureId: 'ui-commit', support: 'unknown', screenshots: [] },
   { featureId: 'diff-viewer', support: 'unknown', screenshots: [] },
   { featureId: 'diff-whitespace-toggle', support: 'unknown', screenshots: [] },
   { featureId: 'diff-multi-views', support: 'unknown', screenshots: [] },

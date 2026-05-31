@@ -65,6 +65,7 @@ export const LATEST_KNOWN_FEATURES: FeatureSupport[] = [
     sourceUrl: 'https://docker.github.io/docker-agent/features/tui',
     sourceExtract: '--tui  Run the agent with a Terminal User Interface (TUI) (default true).',
   },
+  { featureId: 'ui-commit', support: 'unknown', screenshots: [] },
   {
     featureId: 'diff-viewer',
     support: 'no',

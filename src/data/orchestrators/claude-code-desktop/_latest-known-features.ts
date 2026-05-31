@@ -113,6 +113,12 @@ export const LATEST_KNOWN_FEATURES: FeatureSupport[] = [
       'View modes control how much detail appears in the chat transcript. […] Verbose — Every tool call, file read, and intermediate step Claude takes.',
   },
   {
+    featureId: 'ui-commit',
+    support: 'no',
+    note: 'No in-app commit surface; committing requires an external Git client or the terminal.',
+    screenshots: [],
+  },
+  {
     featureId: 'diff-viewer',
     support: 'yes',
     note: 'Desktop app diff viewer shows changes file by file before creating a pull request.',

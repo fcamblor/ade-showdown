@@ -57,6 +57,7 @@ export const LATEST_KNOWN_FEATURES: FeatureSupport[] = [
     sourceExtract:
       'Logs panel shows process execution logs. Process tabs: switch between different running processes. View stdout/stderr in real-time.',
   },
+  { featureId: 'ui-commit', support: 'unknown', screenshots: [] },
   {
     featureId: 'diff-viewer',
     support: 'yes',

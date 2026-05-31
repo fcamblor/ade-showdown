@@ -287,6 +287,14 @@ const features: Feature[] = [
     },
   },
   {
+    id: 'ui-commit',
+    label: 'In-app commit',
+    category: 'ux',
+    shortDescription: 'Commit changes directly from the UI with file selection and a manual or AI-generated commit message.',
+    longDescription:
+      'The orchestrator provides a built-in commit surface — file staging checkboxes, a commit message field, and optionally an AI-generated message — so the user can commit without leaving the ADE. "Partial" when file selection or message generation is missing. A simple "commit all" one-click with no staging control does NOT qualify as "yes".',
+  },
+  {
     id: 'diff-viewer',
     label: 'In-app diff viewer',
     category: 'ux',

@@ -72,6 +72,7 @@ export const LATEST_KNOWN_FEATURES: FeatureSupport[] = [
     sourceUrl: 'https://developers.openai.com/codex/app',
     sourceExtract: 'Run commands in each thread and launch repeatable project actions.',
   },
+  { featureId: 'ui-commit', support: 'unknown', screenshots: [] },
   {
     featureId: 'diff-viewer',
     support: 'yes',

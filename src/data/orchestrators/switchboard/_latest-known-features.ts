@@ -9,6 +9,7 @@ export const LATEST_KNOWN_FEATURES: FeatureSupport[] = [
   { featureId: 'pr-creation', support: 'unknown', screenshots: [] },
   { featureId: 'visual-task-management', support: 'yes', note: 'Launch, resume, fork, and monitor sessions; no juggling terminal tabs.', screenshots: [] },
   { featureId: 'live-logs', support: 'unknown', screenshots: [] },
+  { featureId: 'ui-commit', support: 'unknown', screenshots: [] },
   { featureId: 'diff-viewer', support: 'yes', note: 'Shows file diffs and opens in a side panel (IDE Emulation).', screenshots: [] },
   { featureId: 'diff-whitespace-toggle', support: 'unknown', screenshots: [] },
   { featureId: 'diff-multi-views', support: 'unknown', screenshots: [] },

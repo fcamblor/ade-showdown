@@ -9,6 +9,7 @@ export const LATEST_KNOWN_FEATURES: FeatureSupport[] = [
   { featureId: 'pr-creation', support: 'unknown', screenshots: [] },
   { featureId: 'visual-task-management', support: 'yes', note: 'Kanban board for parallel session management.', screenshots: [] },
   { featureId: 'live-logs', support: 'unknown', screenshots: [] },
+  { featureId: 'ui-commit', support: 'unknown', screenshots: [] },
   { featureId: 'diff-viewer', support: 'yes', note: 'Red/green inline diffs with block-level approval.', screenshots: [] },
   { featureId: 'diff-whitespace-toggle', support: 'unknown', screenshots: [] },
   { featureId: 'diff-multi-views', support: 'unknown', screenshots: [] },

@@ -62,6 +62,7 @@ export const LATEST_KNOWN_FEATURES: FeatureSupport[] = [
     sourceExtract:
       'Cursor enables agents to run shell commands directly in your terminal, with safe sandbox execution on macOS, Linux, and Windows.',
   },
+  { featureId: 'ui-commit', support: 'unknown', screenshots: [] },
   {
     featureId: 'diff-viewer',
     support: 'yes',

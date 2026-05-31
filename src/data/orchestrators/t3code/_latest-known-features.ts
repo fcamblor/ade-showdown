@@ -64,6 +64,7 @@ export const LATEST_KNOWN_FEATURES: FeatureSupport[] = [
     sourceExtract:
       'Provider-native events are pulled back into the server by ProviderRuntimeIngestion, which converts them into orchestration events. […] Server pushes those updates to the browser through ServerPushBus on channels defined in orchestration.ts.',
   },
+  { featureId: 'ui-commit', support: 'unknown', screenshots: [] },
   {
     featureId: 'diff-viewer',
     support: 'yes',
