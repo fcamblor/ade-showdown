@@ -39,6 +39,7 @@ export const FEATURE_IDS = [
   'terminal-in-worktree',
   'run-configurations',
   'custom-ui-actions',
+  'ui-commit',
   'diff-viewer',
   'diff-whitespace-toggle',
   'diff-multi-views',
